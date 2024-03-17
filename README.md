@@ -1,2 +1,2 @@
 # snap
-A chrome extension that captures frames from YT video and generates a PDF 
+A chrome extension that captures video frames and transform them into convenient PDF notes, perfect for students and professionals.
