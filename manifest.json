@@ -1,0 +1,23 @@
+{
+    "manifest_version": 3,
+    "name": "Snap",
+    "version": "1.0",
+    "description": "Capture video frames and transform them into convenient PDF notes, perfect for students and professionals.",
+    "permissions": ["activeTab", "scripting"],
+    "host_permissions": ["<all_urls>"],
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": {
+        "16": "icons/icons16.png",
+        "48": "icons/icons48.png",
+        "128": "icons/icons48.png"
+      }
+    },
+    "content_scripts": [
+      {
+        "matches": ["https://www.youtube.com/watch?*"],
+        "js": ["js/Constants.js", "js/View.js", "js/Factory.js", "js/content.js"]
+      }
+    ]
+  }
+  
