@@ -16,7 +16,7 @@
     "content_scripts": [
       {
         "matches": ["https://www.youtube.com/watch?*"],
-        "js": ["js/Constants.js", "js/View.js", "js/Factory.js", "js/content.js"]
+        "js": ["lib/jspdf.umd.min.js", "js/Utils.js", "js/Constants.js", "js/View.js", "js/Factory.js", "js/content.js"]
       }
     ]
   }
