@@ -4,8 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Extension Popup</title>
+    <link rel="stylesheet" href="./styles/popup.css">
+    <script defer src="./popup/popup.js"></script>
+     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> -->
 </head>
 <body>
-    <h1>This is the popup!</h1>
+    <div class="snap-container">
+        <p class="snap-desc">View the captured images and export a pdf</p>
+
+        <div class="snap-btn-container">
+            <button id="snap-btn-show-page" class="snap-btn">Show pages</button>
+            <!-- <img src="show.png" alt="Icon" class="icon"> -->
+        </div>
+        
+        <div class="snap-btn-container">
+            <button id="snap-btn-export" class="snap-btn">Export </button>
+            <!-- <img src="export.png" alt="Icon" class="icon">             -->
+        </div>
+
+    </div>
+    
 </body>
 </html>

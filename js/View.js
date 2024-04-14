@@ -17,8 +17,6 @@ class View
         this.pageView.addEventListener(View.EVT_IMAGE_CAPTURED, this.OnImageCaptured.bind(this));
 
         this.arrBlob = [];
-
-        
     }
 
     InsertCaptureBtn()
@@ -31,12 +29,12 @@ class View
         console.log("Event recieved");
         console.log(e);
         this.arrBlob.push(e.detail);
-        this.GeneratePDF();
+        this.pageView.UpdateCount(this.arrBlob.length);
     }
 
-    GeneratePDF()
+    Export()
     {
-        if(this.arrBlob.length < 2)
+        if(this.arrBlob.length == 0)
             return;
 
         const oPageSize = this.pageView.GetPageSize();
@@ -50,19 +48,20 @@ class View
 
         const oImageRect = this.pageView.GetImageRect();
 
-        //add watermark on first page
+        let image = new Image();
+        image.src =  URL.createObjectURL(this.arrBlob[0]);
+        doc.addImage(image, "png", oImageRect["x"], oImageRect["y"], oImageRect["width"], oImageRect["height"], "Demo", "SLOW");
 
-        for(let i = 0; i < this.arrBlob.length; i++)
+
+        for(let i = 1; i < this.arrBlob.length; i++)
         {
-            const image = new Image();
+            image = new Image();
             image.src =  URL.createObjectURL(this.arrBlob[i]);
             
             doc.addPage([oPageSize["width"], oPageSize["height"]], "l");
             doc.addImage(image, "png", oImageRect["x"], oImageRect["y"], oImageRect["width"], oImageRect["height"], "Demo", "SLOW");
         }
         
-        
-
         doc.save("demo.pdf");
     }
 }
@@ -74,6 +73,9 @@ class YTPageView extends EventTarget
     {
         super();
         this.btnScreenShot;
+        this.countBubble;
+        this.container;
+
         this.imageFormat = ".png";
         this.CaptureScreenshotThrottled = GetThrottleFunction(this.CaptureScreenshot.bind(this), 200); 
 
@@ -105,21 +107,41 @@ class YTPageView extends EventTarget
 
     CreateScreenshotBtn()
     {
+
+        this.container = document.createElement("div");
+        this.container.className = "snap-screenshot-btn-container"
+
         this.btnScreenShot = document.createElement("button");
-        this.btnScreenShot.className = "screenshotButton ytp-button";
-        this.btnScreenShot.style.width = "auto";
-        this.btnScreenShot.innerHTML = "Screenshot";
-        this.btnScreenShot.style.cssFloat = "left";
+        this.btnScreenShot.className = "snap-yt-screenshot-btn screenshotButton ytp-button";
+        this.btnScreenShot.innerHTML = "Capture";
+        this.container.appendChild(this.btnScreenShot);
     }
+
+    CreateCountBubble()
+    {
+        this.countBubble = document.createElement("span");
+        this.countBubble.className = "snap-count-bubble";
+        this.container.appendChild(this.countBubble);
+    }
+
+    UpdateCount(uCount)
+    {
+        if(!this.countBubble)
+            this.CreateCountBubble();
+        this.countBubble.innerHTML = uCount;
+    }
+
+
 
     InsertCaptureBtn()
     {
         this.CreateScreenshotBtn();
         
+        
         const bottomControls = document.getElementsByClassName("ytp-right-controls")[0];
         if (bottomControls) 
         {
-            bottomControls.prepend(this.btnScreenShot);
+            bottomControls.prepend(this.container);
         }
         else
         {
@@ -134,7 +156,6 @@ class YTPageView extends EventTarget
 
     CaptureScreenshot() 
     {
-
         const title = `screenshot${Date.now()}${this.imageFormat}`;
     
         const player = document.getElementsByClassName(elementClass.YOUTUBE_VIDEO_PLAYER)[0];
@@ -153,9 +174,6 @@ class YTPageView extends EventTarget
             downloadLink.click();
         }
         
-    
-        
-    
         canvas.toBlob(async (blob) => {
             this.dispatchEvent(new CustomEvent(View.EVT_IMAGE_CAPTURED, {detail: blob})); 
             

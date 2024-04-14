@@ -1,0 +1,33 @@
+.snap-screenshot-btn-container, 
+.snap-screenshot-btn-container *,
+.snap-screenshot-btn-container *:before,
+.snap-screenshot-btn-container *:after {
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	box-sizing:border-box;
+}
+
+.snap-screenshot-btn-container{
+	position: relative;
+    float: left;
+}
+
+.snap-screenshot-btn-container .snap-count-bubble{
+    position:absolute;
+	top: 2px;
+	right:-5px;
+    height: 16px;
+    font-size:12px;
+    line-height: 16px;
+    background: white;
+    color: black;
+    font-weight: 600;
+	padding:0px 5px;
+	border-radius:50%;
+}
+
+.snap-yt-screenshot-btn {
+    width: auto;
+    float: left;
+    position: relative;
+}
