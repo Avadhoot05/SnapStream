@@ -21,8 +21,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             view.Export();
             return;
         }
-        if(message.type === "exportBtnClicked") 
+        if(message.type === "showPagesBtnClicked") 
         {
+            view.ShowPages();
             return;
         }
 

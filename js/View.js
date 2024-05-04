@@ -17,6 +17,8 @@ class View
         this.pageView.addEventListener(View.EVT_IMAGE_CAPTURED, this.OnImageCaptured.bind(this));
 
         this.arrBlob = [];
+
+        this.imageDialog;
     }
 
     InsertCaptureBtn()
@@ -63,6 +65,13 @@ class View
         }
         
         doc.save("demo.pdf");
+    }
+
+
+
+    ShowPages()
+    {
+        this.imageDialog = new ImageDialog();
     }
 }
 
