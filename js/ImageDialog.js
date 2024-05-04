@@ -1,7 +1,7 @@
 class ImageDialog
 {
 
-    constructor()
+    constructor(arrBlob)
     {
         /**@type {HTMLElement}*/
         this.header;
@@ -10,9 +10,20 @@ class ImageDialog
         this.container;
 
         this.backDrop;
+
+        this.arrBlob = arrBlob;
+
         this.CreateOuterContainer();
         this.CreateHeader();
+        this.CreateBody();
         this.CreateFooter();
+        this.ShowHide(false);
+    }
+
+    ShowHide(bShow)
+    {
+        this.container.style.display = bShow ? "block" : "none";
+        this.backDrop.style.display = bShow ? "block" : "none";
     }
 
     CreateOuterContainer()
@@ -30,6 +41,31 @@ class ImageDialog
     CreateHeader()
     {
 
+    }
+
+
+    CreateBody()
+    {
+        let body = document.createElement("div");
+        body.className = "snap-image-dialog-body";
+        this.container.appendChild(body);
+
+
+        const fragment = document.createDocumentFragment();
+        for(let i = 0; i < this.arrBlob.length; i++)
+        {
+            const imgHolder = document.createElement("div");
+            imgHolder.className = "snap-image-dialog-img-holder";
+            
+            const img = document.createElement("img");
+            img.className = "snap-image-dialog-img";
+            img.src = URL.createObjectURL(this.arrBlob[i]);
+            imgHolder.appendChild(img);
+
+            fragment.appendChild(imgHolder);
+        }
+
+        body.appendChild(fragment);
     }
 
     CreateFooter()

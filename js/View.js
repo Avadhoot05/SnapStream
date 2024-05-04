@@ -71,7 +71,10 @@ class View
 
     ShowPages()
     {
-        this.imageDialog = new ImageDialog();
+        if(!this.imageDialog)
+            this.imageDialog = new ImageDialog(this.arrBlob);
+        
+        this.imageDialog.ShowHide(true);
     }
 }
 
