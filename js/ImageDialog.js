@@ -4,9 +4,6 @@ class ImageDialog
     constructor(arrBlob)
     {
         /**@type {HTMLElement}*/
-        this.header;
-        
-        /**@type {HTMLElement}*/
         this.container;
 
         this.backDrop;
@@ -40,7 +37,10 @@ class ImageDialog
 
     CreateHeader()
     {
-
+        const header = document.createElement("div");
+        header.className = "snap-image-dialog-header";
+        header.textContent = "Captured Pages";
+        this.container.appendChild(header);
     }
 
 
@@ -69,6 +69,31 @@ class ImageDialog
     }
 
     CreateFooter()
+    {
+        const footer = document.createElement("div");
+        footer.className = "snap-image-dialog-footer";
+        this.container.appendChild(footer);
+
+        const btnCancel = document.createElement("button");
+        btnCancel.className = "snap-image-dialog-footer-btn";
+        btnCancel.textContent = "Cancel";
+        btnCancel.addEventListener("click", this.OnCancelClicked.bind(this));
+        footer.appendChild(btnCancel);        
+
+        const btnSave = document.createElement("button");
+        btnSave.className = "snap-image-dialog-footer-btn";
+        btnSave.textContent = "Save";
+        btnSave.addEventListener("click", this.OnSaveClicked.bind(this));
+        footer.appendChild(btnSave);   
+    }
+
+
+    OnSaveClicked(e)
+    {
+
+    }
+
+    OnCancelClicked(e)
     {
 
     }
