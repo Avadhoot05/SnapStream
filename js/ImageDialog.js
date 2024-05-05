@@ -8,13 +8,38 @@ class ImageDialog
 
         this.backDrop;
 
-        this.arrBlob = arrBlob;
+        this.arrBlobWithIds = this.CreateImageData(arrBlob);
+
+        this.mapBlob = this.CreateImageDataMap(this.arrBlobWithIds);
 
         this.CreateOuterContainer();
         this.CreateHeader();
         this.CreateBody();
         this.CreateFooter();
         this.ShowHide(false);
+    }
+
+
+    CreateImageDataMap(arrBlobWithIds)
+    {
+        const mapBlob = arrBlobWithIds.reduce((acc, curr) => {
+            acc.set(curr.id, curr.blob);
+            return acc;
+        }, new Map());
+
+        return mapBlob;
+    }
+
+    CreateImageData(arrBlob)
+    {
+        const arrBlobWithIds = arrBlob.map((blob, index) => {
+            return {
+                blob, 
+                id: index
+            } 
+        });
+
+        return arrBlobWithIds;
     }
 
     ShowHide(bShow)
@@ -48,24 +73,47 @@ class ImageDialog
     {
         let body = document.createElement("div");
         body.className = "snap-image-dialog-body";
+        body.addEventListener("click", this.OnImageClicked.bind(this));
         this.container.appendChild(body);
 
 
         const fragment = document.createDocumentFragment();
-        for(let i = 0; i < this.arrBlob.length; i++)
+        for(let i = 0; i < this.arrBlobWithIds.length; i++)
         {
-            const imgHolder = document.createElement("div");
-            imgHolder.className = "snap-image-dialog-img-holder";
-            
-            const img = document.createElement("img");
-            img.className = "snap-image-dialog-img";
-            img.src = URL.createObjectURL(this.arrBlob[i]);
-            imgHolder.appendChild(img);
-
-            fragment.appendChild(imgHolder);
+            fragment.appendChild(this.CreateImage(this.arrBlobWithIds[i]));
         }
 
         body.appendChild(fragment);
+    }
+
+    OnImageClicked(e)
+    {
+        e.stopPropagation();
+        const id = e.target.id;
+
+        const needle = "snap-image-dialog-img-"; 
+        if(id.indexOf(needle) == -1) 
+            return;
+
+        const idx = id.indexOf(needle);
+        
+        const blob = this.mapBlob.get(parseInt(id.substring(idx + needle.length)));
+
+    }
+
+    CreateImage(blobData)
+    {
+        const {blob, id} = blobData;
+
+        const imgContainer = document.createElement("div");
+        imgContainer.className = "snap-image-dialog-img-container";
+        
+        const img = document.createElement("img");
+        img.className = "snap-image-dialog-img";
+        img.id = `snap-image-dialog-img-${id}`;
+        img.src = URL.createObjectURL(blob);
+        imgContainer.appendChild(img);
+        return imgContainer;
     }
 
     CreateFooter()
