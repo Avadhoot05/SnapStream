@@ -6,19 +6,27 @@ class ImageDialog
         /**@type {HTMLElement}*/
         this.container;
 
+        /**@type {HTMLElement}*/
+        this.body;
+
         this.backDrop;
 
         this.arrBlobWithIds = this.CreateImageData(arrBlob);
 
         this.mapBlob = this.CreateImageDataMap(this.arrBlobWithIds);
 
+
+        this.draggingItem;
+        this.uPointerStartX;
+        this.uPointerStartY;
+
         this.CreateOuterContainer();
         this.CreateHeader();
         this.CreateBody();
         this.CreateFooter();
         this.ShowHide(false);
+        this.InitDragging();
     }
-
 
     CreateImageDataMap(arrBlobWithIds)
     {
@@ -71,10 +79,10 @@ class ImageDialog
 
     CreateBody()
     {
-        let body = document.createElement("div");
-        body.className = "snap-image-dialog-body";
-        body.addEventListener("click", this.OnImageClicked.bind(this));
-        this.container.appendChild(body);
+        this.body = document.createElement("div");
+        this.body.className = "snap-image-dialog-body";
+        this.body.addEventListener("click", this.OnImageClicked.bind(this));
+        this.container.appendChild(this.body);
 
 
         const fragment = document.createDocumentFragment();
@@ -83,7 +91,7 @@ class ImageDialog
             fragment.appendChild(this.CreateImage(this.arrBlobWithIds[i]));
         }
 
-        body.appendChild(fragment);
+        this.body.appendChild(fragment);
     }
 
     OnImageClicked(e)
@@ -145,6 +153,88 @@ class ImageDialog
     {
 
     }
+
+
+
+
+    //#region  drag and reorder
+
+
+    EnableDisableBodyScroll(bEnable)
+    {
+        this.body.style.overflowY = bEnable ? "scroll" : "hidden";
+    }
+
+
+    InitDragging()
+    {
+        this.body.addEventListener('mousedown', this.OnDragStart.bind(this));
+        this.body.addEventListener('touchstart', this.OnDragStart.bind(this));
+        
+        document.addEventListener('mouseup', this.OnDragEnd.bind(this));
+        document.addEventListener('touchend', this.OnDragEnd.bind(this));
+          
+    }
+
+    OnDragStart(e) 
+    {
+        if (e.target.classList.contains('snap-image-dialog-img')) {
+          this.draggingItem = e.target;
+        }
+      
+        if (!this.draggingItem) 
+            return;
+      
+        this.uPointerStartX = e.clientX || e.touches?.[0]?.clientX;
+        this.uPointerStartY = e.clientY || e.touches?.[0]?.clientY;
+      
+        this.EnableDisableBodyScroll(false);
+        this.InitDraggableItem();
+        //prevRect = this.draggingItem.getBoundingClientRect();
+      
+        document.addEventListener('mousemove', this.OnDrag.bind(this));
+        document.addEventListener('touchmove', this.OnDrag.bind(this), { passive: false });
+    }
+
+
+    OnDrag(e) 
+    {
+        if (!this.draggingItem) 
+            return;
+      
+        e.preventDefault();
+      
+        const clientX = e.clientX || e.touches[0].clientX;
+        const clientY = e.clientY || e.touches[0].clientY;
+      
+        const pointerOffsetX = clientX - this.uPointerStartX;
+        const pointerOffsetY = clientY - this.uPointerStartY;
+      
+        this.draggingItem.style.transform = `translate(${pointerOffsetX}px, ${pointerOffsetY}px)`;
+      
+        this.UpdateIdleItemsStateAndPosition()
+    }
+
+    OnDragEnd(e)
+    {
+
+    }
+
+    InitDraggableItem() 
+    {
+        this.draggingItem.classList.remove('is-idle');
+        this.draggingItem.classList.add('is-draggable');
+    }
+
+    UpdateIdleItemsStateAndPosition()
+    {
+
+    }
+    //#endregion
+
+
+
+    
 
 
 
