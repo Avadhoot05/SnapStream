@@ -211,8 +211,70 @@ class ImageDialog
         const pointerOffsetY = clientY - this.uPointerStartY;
       
         this.draggingItem.style.transform = `translate(${pointerOffsetX}px, ${pointerOffsetY}px)`;
-      
+        const oDraggingItemRect = this.draggingItem.getBoundingClientRect();
+
+        this.GetIntersectingImageContainer(oDraggingItemRect);
+        
         this.UpdateIdleItemsStateAndPosition()
+    }
+
+    GetAllImageContainer()
+    {
+        return Array.from(document.getElementsByClassName("snap-image-dialog-img-container"));
+    }
+
+    /**
+     * @param {object} oRect 
+     */
+    GetArea(oRect)
+    {
+        return oRect.width * oRect.height;
+    }
+
+    /**
+     * @param {object} oRect1 
+     * @param {object} oRect2 
+     * @returns 
+     */
+    GetIntersectionRect(oRect1, oRect2)
+    {
+        const oIntersectionRect = {
+            top: Math.max(oRect1.top, oRect2.top),
+            bottom: Math.min(oRect1.bottom, oRect2.bottom),
+            left: Math.max(oRect1.left, oRect2.left),
+            right: Math.min(oRect1.right, oRect2.right)
+        };
+
+        oIntersectionRect.width = Math.abs(oIntersectionRect.right - oIntersectionRect.left);
+        oIntersectionRect.height = Math.abs(oIntersectionRect.bottom - oIntersectionRect.top);
+        return oIntersectionRect;
+    }
+
+    /**
+     * if intersection area is 60% of container area
+     * @param {object} oRect1 
+     * @param {object} oRect2 
+     */
+    IsIntersecting(oRect1, oRect2)
+    {
+        const area1 = this.GetArea(oRect2);
+        const area2 = this.GetArea(this.GetIntersectionRect(oRect1, oRect2));
+
+        if(area2/area1 > 0.6)
+            return true;
+        return false;
+    }
+
+    GetIntersectingImageContainer(oDraggingItemRect)
+    {
+        const arrImageContainer = this.GetAllImageContainer();
+
+        for(let i = 0; i < arrImageContainer.length; i++)
+        {
+            const oContainerRect = arrImageContainer[i].getBoundingClientRect();
+            if(this.IsIntersecting(oDraggingItemRect, oContainerRect))
+                return arrImageContainer[i];
+        }
     }
 
     OnDragEnd(e)
