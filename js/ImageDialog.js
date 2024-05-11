@@ -20,6 +20,8 @@ class ImageDialog
         this.uPointerStartX;
         this.uPointerStartY;
 
+        this.OnDrag = this.OnDrag.bind(this)
+
         this.CreateOuterContainer();
         this.CreateHeader();
         this.CreateBody();
@@ -192,8 +194,8 @@ class ImageDialog
         this.InitDraggableItem();
         //prevRect = this.draggingItem.getBoundingClientRect();
       
-        document.addEventListener('mousemove', this.OnDrag.bind(this));
-        document.addEventListener('touchmove', this.OnDrag.bind(this), { passive: false });
+        document.addEventListener('mousemove', this.OnDrag);
+        document.addEventListener('touchmove', this.OnDrag, { passive: false });
     }
 
 
@@ -213,9 +215,62 @@ class ImageDialog
         this.draggingItem.style.transform = `translate(${pointerOffsetX}px, ${pointerOffsetY}px)`;
         const oDraggingItemRect = this.draggingItem.getBoundingClientRect();
 
-        this.GetIntersectingImageContainer(oDraggingItemRect);
-        
+        let arr = this.GetIntersectingImageContainer(oDraggingItemRect);
+
+        if(arr.length == 0)
+        {
+            this.ShowHideInsertPlaceholder(false);
+        }   
+        else
+        {
+            console.log(arr[0]);
+            const arrImageContainer = this.GetAllImageContainer();
+            this.PositionInsertPlaceHolderAfter(arrImageContainer[arr[0]]);
+        } 
+
         this.UpdateIdleItemsStateAndPosition()
+    }
+
+    CreateInsertPlaceHolder()
+    {
+        this.insertPlaceholder = document.createElement("div");
+        this.insertPlaceholder.className = "snap-insert-placeholder hidden";
+        this.body.appendChild(this.insertPlaceholder);
+    }
+
+    PositionInsertPlaceHolderAfter(node)
+    {
+        if(!node)
+            return;
+
+        if(!this.insertPlaceholder)
+            this.CreateInsertPlaceHolder();
+
+        const oRect = node.getBoundingClientRect();
+        const oBodyRect = this.body.getBoundingClientRect();
+
+
+        this.insertPlaceholder.style.top = `${oRect.top - oBodyRect.top + 48}px`;
+        this.insertPlaceholder.style.left = `${oRect.right - oBodyRect.left}px`;
+        this.ShowHideInsertPlaceholder(true);
+    }
+
+    ShowHideInsertPlaceholder(bShow)
+    {
+        if(!this.insertPlaceholder)
+            return;
+
+        if(bShow)
+        {
+            this.insertPlaceholder.classList.add("visible");
+            this.insertPlaceholder.classList.remove("hidden");
+        }
+        else
+        {
+            this.insertPlaceholder.classList.remove("visible");
+            this.insertPlaceholder.classList.add("hidden");
+        }
+        
     }
 
     GetAllImageContainer()
@@ -238,11 +293,23 @@ class ImageDialog
      */
     GetIntersectionRect(oRect1, oRect2)
     {
+        let uLeft = Math.max(oRect1.left, oRect2.left);
+        let uRight = Math.min(oRect1.right, oRect2.right);
+        let uTop = Math.max(oRect1.top, oRect2.top);
+        let uBottom = Math.min(oRect1.bottom, oRect2.bottom);  
+        if(uRight <= uLeft || uBottom <= uTop)
+        {
+            uLeft = 0;
+            uRight = 0;
+            uTop = 0;
+            uBottom = 0;
+        }
+
         const oIntersectionRect = {
-            top: Math.max(oRect1.top, oRect2.top),
-            bottom: Math.min(oRect1.bottom, oRect2.bottom),
-            left: Math.max(oRect1.left, oRect2.left),
-            right: Math.min(oRect1.right, oRect2.right)
+            top: uTop,
+            bottom: uBottom,
+            left: uLeft,
+            right: uRight
         };
 
         oIntersectionRect.width = Math.abs(oIntersectionRect.right - oIntersectionRect.left);
@@ -260,7 +327,7 @@ class ImageDialog
         const area1 = this.GetArea(oRect2);
         const area2 = this.GetArea(this.GetIntersectionRect(oRect1, oRect2));
 
-        if(area2/area1 > 0.6)
+        if(area2/area1 > 0.3)
             return true;
         return false;
     }
@@ -268,18 +335,34 @@ class ImageDialog
     GetIntersectingImageContainer(oDraggingItemRect)
     {
         const arrImageContainer = this.GetAllImageContainer();
-
+        let arr = [];
         for(let i = 0; i < arrImageContainer.length; i++)
         {
             const oContainerRect = arrImageContainer[i].getBoundingClientRect();
             if(this.IsIntersecting(oDraggingItemRect, oContainerRect))
-                return arrImageContainer[i];
+            {
+                arr.push(i); 
+            }
+
+            if(arr.length == 2)
+                return arr;
         }
+
+        return arr;
     }
 
     OnDragEnd(e)
     {
+        this.Cleanup();    
+    }
 
+
+    Cleanup() 
+    {
+        this.EnableDisableBodyScroll(true);
+        
+        document.removeEventListener('mousemove', this.OnDrag);
+        document.removeEventListener('touchmove', this.OnDrag);
     }
 
     InitDraggableItem() 
