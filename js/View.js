@@ -5,6 +5,7 @@ class View
     static get EVT_IMAGE_CAPTURED() {
         return "EVT_IMAGE_CAPTURED";
     }
+
     constructor(pageView)
     {
         if(viewObj)
@@ -72,9 +73,22 @@ class View
     ShowPages()
     {
         if(!this.imageDialog)
+        {
             this.imageDialog = new ImageDialog(this.arrBlob);
+            this.imageDialog.addEventListener(ImageDialog.EVT_SAVE_CLICKED, this.OnImageDialogSaveClicked.bind(this));
+        }
+        else
+        {
+            this.imageDialog.SetBlobs(this.arrBlob);
+        }
         
         this.imageDialog.ShowHide(true);
+    }
+
+    OnImageDialogSaveClicked(e)
+    {
+        this.arrBlob = e.detail;
+        this.pageView.UpdateCount(this.arrBlob.length);
     }
 }
 

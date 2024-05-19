@@ -1,33 +1,39 @@
-class ImageDialog
+class ImageDialog extends EventTarget
 {
+    static get EVT_SAVE_CLICKED() {
+        return "EVT_SAVE_CLICKED";
+    }
 
     constructor(arrBlob)
     {
+        super();
         /**@type {HTMLElement}*/
         this.container;
 
         /**@type {HTMLElement}*/
         this.body;
-
         this.backDrop;
+        this.CreateOuterContainer();
+        this.CreateHeader();
 
-        this.arrBlobWithIds = this.CreateImageData(arrBlob);
-
-        this.mapBlob = this.CreateImageDataMap(this.arrBlobWithIds);
-
+        this.SetBlobs(arrBlob);
 
         this.draggingItem;
         this.uPointerStartX;
         this.uPointerStartY;
 
-        this.OnDrag = this.OnDrag.bind(this)
+        this.OnDrag = this.OnDrag.bind(this);
 
-        this.CreateOuterContainer();
-        this.CreateHeader();
-        this.CreateBody();
         this.CreateFooter();
         this.ShowHide(false);
         this.InitDragging();
+    }
+
+    SetBlobs(arrBlob)
+    {
+        this.arrBlobWithIds = this.CreateImageData(arrBlob);
+        this.mapBlob = this.CreateImageDataMap(this.arrBlobWithIds);
+        this.CreateBody();
     }
 
     CreateImageDataMap(arrBlobWithIds)
@@ -81,17 +87,30 @@ class ImageDialog
 
     CreateBody()
     {
-        this.body = document.createElement("div");
-        this.body.className = "snap-image-dialog-body";
-        this.body.addEventListener("click", this.OnImageClicked.bind(this));
+        if(!this.body)
+        {
+            this.body = document.createElement("div");
+            this.body.className = "snap-image-dialog-body";
+            this.body.addEventListener("click", this.OnImageClicked.bind(this));
+            this.container.appendChild(this.body);
+        }
         
-        this.container.appendChild(this.body);
+        const arrImage = this.GetAllImages();
+        
+        let i = 0;
 
+        while(i < arrImage.length)
+        {
+            const img = arrImage[i];
+            img.src = URL.createObjectURL(this.arrBlobWithIds[i].blob);
+            i++;
+        }
 
         const fragment = document.createDocumentFragment();
-        for(let i = 0; i < this.arrBlobWithIds.length; i++)
+        while(i < this.arrBlobWithIds.length)
         {
             fragment.appendChild(this.CreateImage(this.arrBlobWithIds[i]));
+            i++;
         }
 
         this.body.appendChild(fragment);
@@ -174,16 +193,15 @@ class ImageDialog
 
     OnSaveClicked(e)
     {
-
+        const arrBlob = this.arrBlobWithIds.filter(blob => blob.blob);
+        this.dispatchEvent(new CustomEvent(ImageDialog.EVT_SAVE_CLICKED, { detail: arrBlob }));
+        this.ShowHide(false);
     }
 
     OnCancelClicked(e)
     {
-
+        this.ShowHide(false);
     }
-
-
-
 
     //#region  drag and reorder
 
@@ -191,6 +209,14 @@ class ImageDialog
     EnableDisableBodyScroll(bEnable)
     {
         this.body.style.overflowY = bEnable ? "scroll" : "hidden";
+    }
+
+    ShowHideImageButton(bShow)
+    {
+        const arrDeleteBtn =  this.GetAllDeleteBtn();
+        arrDeleteBtn.forEach(btn => {
+            btn.style.display = bShow ? "block" : "none";
+        })
     }
 
 
@@ -213,6 +239,7 @@ class ImageDialog
         this.uPointerStartY = e.clientY || e.touches?.[0]?.clientY;
       
         this.EnableDisableBodyScroll(false);
+        this.ShowHideImageButton(false);
         this.InitDraggableItem();
         //prevRect = this.draggingItem.getBoundingClientRect();
       
@@ -240,12 +267,12 @@ class ImageDialog
         this.draggingItem.style.transform = `translate(${pointerOffsetX}px, ${pointerOffsetY}px)`;
         
         const idx = this.GetIndexToShowPlaceholderAfter();
-        if(idx == -1)
+        if(idx == -2)
             this.ShowHideInsertPlaceholder(false);
         else
         {
             const arrImageContainer = this.GetAllImageContainer();
-            this.PositionInsertPlaceHolderAfter(arrImageContainer[idx]);
+            this.PositionInsertPlaceHolderAfter(arrImageContainer[idx == -1 ? 0 : idx], idx != -1);
         }
         
         this.UpdateIdleItemsStateAndPosition()
@@ -256,7 +283,12 @@ class ImageDialog
     {
         const oDraggingItemRect = this.draggingItem.getBoundingClientRect();
         const arr = this.GetIntersectingImageContainer(oDraggingItemRect);
-        return arr.length == 0 ? -1 : arr[0];  
+        console.log("XXX", arr[0], arr[1]);
+
+        if(arr.length == 1 && arr[0] == 0) // ar first position
+            return -1;
+
+        return arr.length == 0 ? -2 : arr[0];  
     }
 
     GetImageIndexFromEleId(prefix, id)
@@ -272,7 +304,10 @@ class ImageDialog
     {
         document.addEventListener('mouseup', this.OnDragEnd.bind(this));
         document.addEventListener('touchend', this.OnDragEnd.bind(this));
-        
+
+        if(!this.draggingItem)
+            return;
+
         const id =  this.draggingItem.id;
         const imageIndex = this.GetImageIndexFromEleId("snap-image-dialog-img-", id);
         if(imageIndex == -1)
@@ -282,6 +317,9 @@ class ImageDialog
         }
             
         const idx = this.GetIndexToShowPlaceholderAfter();
+        if(idx == -2)
+            return;
+            
         let blob = this.arrBlobWithIds[imageIndex];
 
         if(imageIndex > idx)
@@ -305,7 +343,7 @@ class ImageDialog
         });
 
         this.mapBlob = this.CreateImageDataMap(this.arrBlobWithIds);
-        this.SetImageIds();
+        this.UpdateImageIds();
 
         const arrImage = this.GetAllImages();
         for(let i = 0; i < arrImage.length; i++)
@@ -317,6 +355,7 @@ class ImageDialog
         this.draggingItem.style.transform = "none";
         this.ShowHideInsertPlaceholder(false);
         this.EnableDisableBodyScroll(true);
+        this.ShowHideImageButton(true);
         this.Cleanup();    
     }
 
@@ -345,12 +384,12 @@ class ImageDialog
         const arrImageContainer = this.GetAllImageContainer();
         arrImageContainer[imageIndex].remove();
 
-        this.SetImageIds();
+        this.UpdateImageIds();
 
 
     }
 
-    SetImageIds()
+    UpdateImageIds()
     {
         const arrImage = this.GetAllImages();
         arrImage.forEach((img, idx) => {
@@ -365,6 +404,7 @@ class ImageDialog
         });
     }
 
+
     CreateInsertPlaceHolder()
     {
         this.insertPlaceholder = document.createElement("div");
@@ -372,7 +412,7 @@ class ImageDialog
         this.body.appendChild(this.insertPlaceholder);
     }
 
-    PositionInsertPlaceHolderAfter(node)
+    PositionInsertPlaceHolderAfter(node, bAfter)
     {
         if(!node)
             return;
@@ -385,7 +425,11 @@ class ImageDialog
 
 
         this.insertPlaceholder.style.top = `${oRect.top - oBodyRect.top + 48}px`;
-        this.insertPlaceholder.style.left = `${oRect.right - oBodyRect.left}px`;
+
+        if(bAfter)
+            this.insertPlaceholder.style.left = `${oRect.right - oBodyRect.left}px`;
+        else
+            this.insertPlaceholder.style.left = `${oRect.left - oBodyRect.left - 10}px`;
         this.ShowHideInsertPlaceholder(true);
     }
 
@@ -415,6 +459,11 @@ class ImageDialog
     GetAllImages()
     {
         return Array.from(document.getElementsByClassName("snap-image-dialog-img"));
+    }
+
+    GetAllDeleteBtn()
+    {
+        return Array.from(document.getElementsByClassName("snap-image-dialog-img-delete"));
     }
 
     /**
