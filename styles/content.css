@@ -7,6 +7,10 @@
 	box-sizing:border-box;
 }
 
+i {
+    text-decoration: none;
+}
+
 .snap-screenshot-btn-container{
 	position: relative;
     float: left;
@@ -87,6 +91,7 @@
 }
 
 .snap-image-dialog-img-container{
+    position: relative;
     width: 200px;
     height: 150px;
     max-width: 200px;
@@ -138,6 +143,17 @@
 .visible {
     display: block;
 }
+
+.snap-image-dialog-img-delete {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 5;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+
 
 
 

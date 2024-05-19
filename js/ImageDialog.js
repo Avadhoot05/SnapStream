@@ -84,6 +84,7 @@ class ImageDialog
         this.body = document.createElement("div");
         this.body.className = "snap-image-dialog-body";
         this.body.addEventListener("click", this.OnImageClicked.bind(this));
+        
         this.container.appendChild(this.body);
 
 
@@ -100,6 +101,13 @@ class ImageDialog
     {
         e.stopPropagation();
         const id = e.target.id;
+        if(this.IsDeleteIconClicked(e))
+        {
+            this.OnImageDelete(id);
+            return;
+        }
+            
+
 
         const needle = "snap-image-dialog-img-"; 
         if(id.indexOf(needle) == -1) 
@@ -123,7 +131,25 @@ class ImageDialog
         img.id = `snap-image-dialog-img-${id}`;
         img.src = URL.createObjectURL(blob);
         imgContainer.appendChild(img);
+
+        const deleteIcon = this.CreateButton("fa fa-trash"); 
+        deleteIcon.className = "snap-image-dialog-img-delete";
+        deleteIcon.id = `snap-image-dialog-img-delete-${id}`;
+        imgContainer.appendChild(deleteIcon);
+
         return imgContainer;
+    }
+
+    CreateButton(strClass)
+    {
+        const btn = document.createElement("button");
+        btn.className = "btn";
+        
+        const iTag = document.createElement("i");
+        iTag.className = strClass;
+        iTag.style.pointerEvents = "none";
+        btn.appendChild(iTag);
+        return btn;
     }
 
     CreateFooter()
@@ -172,10 +198,6 @@ class ImageDialog
     {
         this.body.addEventListener('mousedown', this.OnDragStart.bind(this));
         this.body.addEventListener('touchstart', this.OnDragStart.bind(this));
-        
-        document.addEventListener('mouseup', this.OnDragEnd.bind(this));
-        document.addEventListener('touchend', this.OnDragEnd.bind(this));
-          
     }
 
     OnDragStart(e) 
@@ -196,6 +218,9 @@ class ImageDialog
       
         document.addEventListener('mousemove', this.OnDrag);
         document.addEventListener('touchmove', this.OnDrag, { passive: false });
+
+        document.addEventListener('mouseup', this.OnDragEnd.bind(this));
+        document.addEventListener('touchend', this.OnDragEnd.bind(this));
     }
 
 
@@ -234,20 +259,22 @@ class ImageDialog
         return arr.length == 0 ? -1 : arr[0];  
     }
 
-    GetImageIndexFromEleId(id)
+    GetImageIndexFromEleId(prefix, id)
     {
-        const needle = "snap-image-dialog-img-"; 
-        const prefixIndex = id.indexOf(needle); 
+        const prefixIndex = id.indexOf(prefix); 
         if(prefixIndex == -1) 
             return -1;
 
-        return parseInt(id.substring(prefixIndex + needle.length));
+        return parseInt(id.substring(prefixIndex + prefix.length));
     }
 
     OnDragEnd(e)
     {
+        document.addEventListener('mouseup', this.OnDragEnd.bind(this));
+        document.addEventListener('touchend', this.OnDragEnd.bind(this));
+        
         const id =  this.draggingItem.id;
-        const imageIndex = this.GetImageIndexFromEleId(id);
+        const imageIndex = this.GetImageIndexFromEleId("snap-image-dialog-img-", id);
         if(imageIndex == -1)
         {
             this.Cleanup();
@@ -278,49 +305,64 @@ class ImageDialog
         });
 
         this.mapBlob = this.CreateImageDataMap(this.arrBlobWithIds);
+        this.SetImageIds();
 
         const arrImage = this.GetAllImages();
-        
         for(let i = 0; i < arrImage.length; i++)
         {
             const img = arrImage[i];
-            //const imageIndex = this.GetImageIndexFromEleId(img.id);
-
-            
-            
-            img.id = `snap-image-dialog-img-${i}`;
             img.src = URL.createObjectURL(this.mapBlob.get(i));
         }
 
         this.draggingItem.style.transform = "none";
-         
-
-
-
-
-        // const arrImageContainer = this.GetAllImageContainer();
-        // const arrImage = this.GetAllImages();
-
-        // //insert in right container and shift all right containers by one
-        // if(imageIndex > idx)
-        // {
-        //     let curr = this.draggingItem;
-        //     let oCurrContainerRect = arrImageContainer[imageIndex].getBoundingClientRect();
-
-        //     let i = idx+1;
-        //     while(i < arrImageContainer.length)
-        //     {
-        //         let oTargetContainerRect = arrImageContainer[i].getBoundingClientRect();
-                
-        //         curr.style.transform = `translate(${oTargetContainerRect.x - oCurrContainerRect.x}px, ${oTargetContainerRect.y- oCurrContainerRect.y}px)`;
-        //         curr = arrImage[i];
-        //         oCurrContainerRect = arrImageContainer[i].getBoundingClientRect();
-        //         i++;
-        //     }
-        // }
         this.ShowHideInsertPlaceholder(false);
         this.EnableDisableBodyScroll(true);
         this.Cleanup();    
+    }
+
+
+    IsDeleteIconClicked(e)
+    {
+        return e.target.classList.contains('snap-image-dialog-img-delete')
+    }
+
+    OnImageDelete(id)
+    {
+        const imageIndex = this.GetImageIndexFromEleId("snap-image-dialog-img-delete-", id)
+        if(imageIndex == -1)
+            return;
+
+        this.arrBlobWithIds.splice(imageIndex, 1);
+        this.arrBlobWithIds = this.arrBlobWithIds.map((blob, index) => {
+            return {
+                blob : blob.blob, 
+                id: index
+            } 
+        });
+
+        this.mapBlob.delete(imageIndex);
+
+        const arrImageContainer = this.GetAllImageContainer();
+        arrImageContainer[imageIndex].remove();
+
+        this.SetImageIds();
+
+
+    }
+
+    SetImageIds()
+    {
+        const arrImage = this.GetAllImages();
+        arrImage.forEach((img, idx) => {
+            img.id = `snap-image-dialog-img-${idx}`;
+        });
+
+        const arrImageContainer = this.GetAllImageContainer();
+        arrImageContainer.forEach((imgContainer, idx) => {
+            const deleteIcon = imgContainer.getElementsByClassName("snap-image-dialog-img-delete");
+            if(deleteIcon.length > 0)            
+                deleteIcon[0].id = `snap-image-dialog-img-delete-${idx}`;
+        });
     }
 
     CreateInsertPlaceHolder()

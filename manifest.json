@@ -18,7 +18,7 @@
       {
         "matches": ["https://www.youtube.com/watch?*"],
         "js": ["lib/jspdf.umd.min.js", "js/Utils.js", "js/Constants.js", "js/ImageDialog.js", "js/View.js", "js/Factory.js", "js/content.js"],
-        "css": ["styles/content.css"]
+        "css": ["styles/font.css", "styles/content.css"]
       }
     ]
   }
