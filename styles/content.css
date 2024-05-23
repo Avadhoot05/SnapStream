@@ -34,6 +34,7 @@ i {
     width: auto;
     float: left;
     position: relative;
+    cursor: pointer;
 }
 
 .snap-image-dialog-container {
@@ -151,6 +152,17 @@ i {
     z-index: 5;
     border-radius: 50%;
     cursor: pointer;
+}
+
+.udemy-button {
+    background: transparent;
+    color: white;
+    border: none;
+}
+
+.snap-count-bubble-udemy {
+    top: -10px !important;
+    right: -10px !important;
 }
 
 

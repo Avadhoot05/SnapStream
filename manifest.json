@@ -16,7 +16,7 @@
     },
     "content_scripts": [
       {
-        "matches": ["https://www.youtube.com/watch?*"],
+        "matches": ["https://www.youtube.com/watch?*", "https://www.udemy.com/course/*"],
         "js": ["lib/jspdf.umd.min.js", "js/Utils.js", "js/Constants.js", "js/ImageDialog.js", "js/View.js", "js/Factory.js", "js/content.js"],
         "css": ["styles/font.css", "styles/content.css"]
       }

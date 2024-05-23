@@ -193,7 +193,7 @@ class ImageDialog extends EventTarget
 
     OnSaveClicked(e)
     {
-        const arrBlob = this.arrBlobWithIds.filter(blob => blob.blob);
+        const arrBlob = this.arrBlobWithIds.map(blob => blob.blob);
         this.dispatchEvent(new CustomEvent(ImageDialog.EVT_SAVE_CLICKED, { detail: arrBlob }));
         this.ShowHide(false);
     }

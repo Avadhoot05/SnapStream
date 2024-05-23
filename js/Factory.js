@@ -12,6 +12,11 @@ class PageViewFactory
             console.log("YT detected");
             return new YTPageView();
         }
+        if(strUrl.indexOf(ViewUrl.UDEMY) != -1)
+        {
+            console.log("Udemy detected");
+            return new UdemyPageView();
+        }
         return null;
     }
 }
