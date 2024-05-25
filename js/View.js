@@ -21,6 +21,19 @@ class View
         this.arrImageEle = [];
 
         this.imageDialog;
+
+        window.addEventListener('beforeunload', this.OnTabClosed.bind(this), {capture: true});
+        console.log("XX Unload listener attached");
+    }
+
+    OnTabClosed(e)
+    {
+        if(this.arrBlob.length > 0)
+        {
+            e.preventDefault();
+            e.returnValue = 'Captured images will be lost.';
+        }
+            
     }
 
     InsertCaptureBtn()
@@ -150,7 +163,17 @@ class YTPageView extends EventTarget
     {
         if(!this.countBubble)
             this.CreateCountBubble();
-        this.countBubble.innerHTML = uCount;
+        if(uCount == 0)
+        {
+            this.countBubble.classList.remove("visible");
+            this.countBubble.classList.add("hidden");
+        }
+        else
+        {
+            this.countBubble.innerHTML = uCount;
+            this.countBubble.classList.add("visible");
+            this.countBubble.classList.remove("hidden");
+        }
     }
 
     InsertCaptureBtn()

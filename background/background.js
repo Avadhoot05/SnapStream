@@ -16,3 +16,23 @@ chrome.runtime.onInstalled.addListener(async () =>
       }
     }
   });
+
+//   chrome.tabs.onUpdated.addListener(
+//     function(tabId, changeInfo, tab) {
+//       // read changeInfo data and do something with it
+//       // like send the new url to contentscripts.js
+//       if (changeInfo.url) {
+        
+//       }
+//     }
+//   );
+
+
+
+//   function SendMessageToTab(tabId, msg)
+//   {
+//     chrome.tabs.sendMessage( tabId, {
+//         message: "UrlChanged",
+//         url: changeInfo.url
+//       })
+//   }
