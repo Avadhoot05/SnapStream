@@ -299,6 +299,14 @@ class ImageDialog extends EventTarget
 
         return parseInt(id.substring(prefixIndex + prefix.length));
     }
+    Reset()
+    {
+        this.draggingItem.style.transform = "none";
+        this.ShowHideInsertPlaceholder(false);
+        this.EnableDisableBodyScroll(true);
+        this.ShowHideImageButton(true);
+        this.Cleanup();  
+    }
 
     OnDragEnd(e)
     {
@@ -312,13 +320,17 @@ class ImageDialog extends EventTarget
         const imageIndex = this.GetImageIndexFromEleId("snap-image-dialog-img-", id);
         if(imageIndex == -1)
         {
-            this.Cleanup();
+            this.Reset();
             return;
         }
             
         const idx = this.GetIndexToShowPlaceholderAfter();
         if(idx == -2)
+        {
+            this.Reset();
             return;
+        }
+            
             
         let blob = this.arrBlobWithIds[imageIndex];
 
@@ -352,11 +364,7 @@ class ImageDialog extends EventTarget
             img.src = URL.createObjectURL(this.mapBlob.get(i));
         }
 
-        this.draggingItem.style.transform = "none";
-        this.ShowHideInsertPlaceholder(false);
-        this.EnableDisableBodyScroll(true);
-        this.ShowHideImageButton(true);
-        this.Cleanup();    
+        this.Reset();  
     }
 
 
