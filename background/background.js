@@ -1,4 +1,6 @@
-chrome.runtime.onInstalled.addListener(async () => 
+chrome.runtime.onInstalled.addListener(InjectScript);
+
+async function InjectScript()
 {
     for (const cs of chrome.runtime.getManifest().content_scripts) 
     {
@@ -6,6 +8,11 @@ chrome.runtime.onInstalled.addListener(async () =>
         {   
             if (tab.url.match(/(chrome|chrome-extension):\/\//gi)) 
                 continue;
+
+            chrome.scripting.insertCSS({
+                files: cs.css, 
+                target:{tabId:tab.id, allFrames: cs.allFrames}
+            });
         
             chrome.scripting.executeScript({
                 files: cs.js,
@@ -15,24 +22,21 @@ chrome.runtime.onInstalled.addListener(async () =>
             });
       }
     }
-  });
-
-//   chrome.tabs.onUpdated.addListener(
-//     function(tabId, changeInfo, tab) {
-//       // read changeInfo data and do something with it
-//       // like send the new url to contentscripts.js
-//       if (changeInfo.url) {
-        
-//       }
-//     }
-//   );
+}
 
 
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.url) 
+    {
+        InjectScript();
+        //SendMessageToTab(tabId, {"type": "UrlChanged", "url" : changeInfo.url});    
+    }
+});
 
-//   function SendMessageToTab(tabId, msg)
-//   {
-//     chrome.tabs.sendMessage( tabId, {
-//         message: "UrlChanged",
-//         url: changeInfo.url
-//       })
-//   }
+
+function SendMessageToTab(tabId, msg)
+{
+    chrome.tabs.sendMessage(tabId, {
+        "message" : msg
+    });
+}

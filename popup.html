@@ -6,23 +6,19 @@
     <title>Extension Popup</title>
     <link rel="stylesheet" href="./styles/popup.css">
     <script defer src="./popup/popup.js"></script>
-     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="snap-container">
         <p class="snap-desc">View the captured images and export a pdf</p>
 
         <div class="snap-btn-container">
-            <button id="snap-btn-show-page" class="snap-btn">Show pages</button>
-            <!-- <img src="show.png" alt="Icon" class="icon"> -->
+            <button title="View all captures" id="snap-btn-show-page" class="snap-btn"><i class="fas fa-eye"></i></button>
+            <button title="Export as PDF" id="snap-btn-export" class="snap-btn"><i class="fas fa-file-export"></i></button>
+            <button title="Delete all" id="snap-btn-delete" class="snap-btn"><i class="fas fa-trash"></i></button>
         </div>
-        
-        <div class="snap-btn-container">
-            <button id="snap-btn-export" class="snap-btn">Export </button>
-            <!-- <img src="export.png" alt="Icon" class="icon">             -->
-        </div>
-
     </div>
     
 </body>
 </html>
+  

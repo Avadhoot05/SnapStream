@@ -1,13 +1,18 @@
 
 var viewObj;
-class View
+class View extends EventTarget
 {
     static get EVT_IMAGE_CAPTURED() {
         return "EVT_IMAGE_CAPTURED";
     }
 
+    static get EVT_IMAGE_COUNT_UPDATED() {
+        return "EVT_IMAGE_COUNT_UPDATED";
+    }
+
     constructor(pageView)
     {
+        super();
         if(viewObj)
         {
             throw new Error("View is already instantiated");
@@ -23,7 +28,6 @@ class View
         this.imageDialog;
 
         window.addEventListener('beforeunload', this.OnTabClosed.bind(this), {capture: true});
-        console.log("XX Unload listener attached");
     }
 
     OnTabClosed(e)
@@ -47,6 +51,7 @@ class View
         console.log(e);
         this.arrBlob.push(e.detail);
         this.pageView.UpdateCount(this.arrBlob.length);
+        this.UpdatePopupState();
     }
 
     Export()
@@ -98,6 +103,21 @@ class View
     {
         this.arrBlob = e.detail;
         this.pageView.UpdateCount(this.arrBlob.length);
+        this.UpdatePopupState();
+    }
+
+    DeleteAll()
+    {
+        this.arrBlob = [];
+        this.pageView.UpdateCount(0);
+        // if(this.ImageDialog)
+        //     this.ImageDialog.DeleteAll();
+        this.UpdatePopupState();
+    }
+
+    UpdatePopupState()
+    {
+        this.dispatchEvent(new CustomEvent(View.EVT_IMAGE_COUNT_UPDATED, {detail: this.arrBlob.length}));
     }
 }
 
@@ -267,7 +287,6 @@ class UdemyPageView extends EventTarget
 
     CreateScreenshotBtn()
     {
-
         this.container = document.createElement("div");
         this.container.className = "snap-screenshot-btn-container"
 
