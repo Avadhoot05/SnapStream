@@ -107,11 +107,6 @@ i {
     background: #2f2f2f;
 }
 
-.snap-image-dialog-img-container:hover {
-    border: 1px dotted blue;
-    /* box-shadow: 1px 1px 2px 3px #2a2a2a; */
-}
-
 .snap-image-dialog-img {
     width: 100%;
     height: 100%;
@@ -160,11 +155,24 @@ i {
 
 .snap-image-dialog-img-delete {
     position: absolute;
+    width: 25px;
+    height: 25px;
+    border: none;
     top: 5px;
     right: 5px;
     z-index: 5;
     border-radius: 50%;
     cursor: pointer;
+    background-color: rgb(35, 35, 35);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.snap-image-dialog-img-delete > img {
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
 }
 
 .udemy-button {

@@ -211,7 +211,6 @@ class YTPageView extends EventTarget
         }
 
         this.btnScreenShot.addEventListener('click', () => {
-            this.AnimateCaptureOnIcon();
             this.CaptureScreenshotThrottled();
         });
     }

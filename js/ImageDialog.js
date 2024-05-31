@@ -151,7 +151,7 @@ class ImageDialog extends EventTarget
         img.src = URL.createObjectURL(blob);
         imgContainer.appendChild(img);
 
-        const deleteIcon = this.CreateButton("fa fa-trash"); 
+        const deleteIcon = this.CreateButton("delete.png"); 
         deleteIcon.className = "snap-image-dialog-img-delete";
         deleteIcon.id = `snap-image-dialog-img-delete-${id}`;
         imgContainer.appendChild(deleteIcon);
@@ -159,15 +159,14 @@ class ImageDialog extends EventTarget
         return imgContainer;
     }
 
-    CreateButton(strClass)
+    CreateButton(strImageName)
     {
         const btn = document.createElement("button");
-        btn.className = "btn";
-        
-        const iTag = document.createElement("i");
-        iTag.className = strClass;
-        iTag.style.pointerEvents = "none";
-        btn.appendChild(iTag);
+        btn.className = "btn snap-delete-icon";
+
+        const img = document.createElement("img");
+        img.src = chrome.runtime.getURL(`./icons/${strImageName}`);
+        btn.appendChild(img);
         return btn;
     }
 
