@@ -12,9 +12,13 @@ i {
 }
 
 .snap-screenshot-btn-container{
+    width: 50px !important;
+    height: 100%;
 	position: relative;
     float: left;
-    width: 60px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .snap-screenshot-btn-container .snap-count-bubble{
@@ -32,7 +36,8 @@ i {
 }
 
 .snap-yt-screenshot-btn {
-    width: auto;
+    width: 30px !important;
+    height: 26px !important;
     float: left;
     position: relative;
     cursor: pointer;

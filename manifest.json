@@ -20,6 +20,12 @@
         "js": ["lib/jspdf.umd.min.js", "js/Utils.js", "js/Constants.js", "js/ImageDialog.js", "js/View.js", "js/Factory.js", "js/content.js"],
         "css": ["styles/font.css", "styles/content.css"]
       }
+    ],
+    "web_accessible_resources": [
+      {
+        "resources": ["icons/*.png"],
+        "matches": ["<all_urls>"]
+      }
     ]
   }
   

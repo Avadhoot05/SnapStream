@@ -162,13 +162,12 @@ class YTPageView extends EventTarget
 
     CreateScreenshotBtn()
     {
-
         this.container = document.createElement("div");
         this.container.className = "snap-screenshot-btn-container"
 
-        this.btnScreenShot = document.createElement("button");
+        this.btnScreenShot = document.createElement("img");
+        this.btnScreenShot.src = chrome.runtime.getURL("./icons/capture.png");
         this.btnScreenShot.className = "snap-yt-screenshot-btn screenshotButton ytp-button";
-        this.btnScreenShot.innerHTML = "Capture";
         this.container.appendChild(this.btnScreenShot);
     }
 
@@ -212,7 +211,7 @@ class YTPageView extends EventTarget
         }
 
         this.btnScreenShot.addEventListener('click', () => {
-
+            this.AnimateCaptureOnIcon();
             this.CaptureScreenshotThrottled();
         });
     }
@@ -290,10 +289,10 @@ class UdemyPageView extends EventTarget
         this.container = document.createElement("div");
         this.container.className = "snap-screenshot-btn-container"
 
-        this.btnScreenShot = document.createElement("button");
+        this.btnScreenShot = document.createElement("img");
+        this.btnScreenShot.src = chrome.runtime.getURL("./icons/capture.png");
         this.btnScreenShot.className = "snap-yt-screenshot-btn screenshotButton udemy-button";
         this.btnScreenShot.id = "snap-screenshot-btn";
-        this.btnScreenShot.innerHTML = "Capture";
         this.container.appendChild(this.btnScreenShot);
     }
 
