@@ -20,7 +20,7 @@ async function InjectScript()
                 injectImmediately: cs.run_at === 'document_start',
                 // world: cs.world, // uncomment if you use it in manifest.json in Chrome 111+
             });
-      }
+        }
     }
 }
 
@@ -28,8 +28,7 @@ async function InjectScript()
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.url) 
     {
-        InjectScript();
-        //SendMessageToTab(tabId, {"type": "UrlChanged", "url" : changeInfo.url});    
+        InjectScript();  
     }
 });
 

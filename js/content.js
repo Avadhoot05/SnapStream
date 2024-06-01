@@ -1,3 +1,5 @@
+DisposeAll();
+
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     console.log('Message received in content script:', request.message);
     if (request["message"]) 
@@ -29,7 +31,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
 });
 
-
 function SendMessagetoPopup(message, cb)
 {
     if(!cb)
@@ -37,6 +38,8 @@ function SendMessagetoPopup(message, cb)
 
     chrome.runtime.sendMessage({message}, cb);
 }
+
+
 
 
 const view = new View(PageViewFactory.GetPageView(location.href));
@@ -48,6 +51,20 @@ function CountUpdated(e)
 {
     const uCount = e.detail;
     SendMessagetoPopup({"type": "CountUpdated", "uCount" : uCount}, null);
+}
+
+function DisposeAll()
+{
+    const arrCls = ["snap-screenshot-btn-container", "snap-image-dialog-container"];
+
+    for(let cls of arrCls)
+    {
+        const arrEle = document.getElementsByClassName(cls);
+        for(let ele of arrEle)
+        {
+            ele.remove();
+        }
+    }
 }
 
 

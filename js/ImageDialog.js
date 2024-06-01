@@ -16,6 +16,7 @@ class ImageDialog extends EventTarget
         this.CreateOuterContainer();
         this.CreateHeader();
 
+        this.arrBlobWithIds = [];
         this.SetBlobs(arrBlob);
 
         this.draggingItem;
@@ -84,6 +85,47 @@ class ImageDialog extends EventTarget
         this.container.appendChild(header);
     }
 
+    GetLabel(strText)
+    {
+        const el = document.createElement("div");
+        el.className = "snap-label";
+        el.innerHTML = strText;
+        return el;
+    }
+
+    ShowHideNoImageLabel(bShow)
+    {
+        if(bShow)
+        {
+            this.body.classList.add("center-children");
+            let noImageLabel = document.getElementById("snap-no-image-label");
+            if(!noImageLabel)
+            {
+                noImageLabel = this.GetLabel("No captured images.");
+                noImageLabel.id = "snap-no-image-label";
+                this.body.appendChild(noImageLabel);
+            }
+            noImageLabel.classList.remove("hidden");
+
+            const arrCls = Array.from(noImageLabel.classList);
+            if(arrCls.indexOf("visible") == -1) 
+                noImageLabel.classList.add("visible");
+
+        }
+        else
+        {
+            this.body.classList.remove("center-children");
+            let noImageLabel = document.getElementById("snap-no-image-label");
+            if(noImageLabel)
+            {
+                noImageLabel.classList.remove("visible");
+                const arrCls = Array.from(noImageLabel.classList);
+                if(arrCls.indexOf("hidden") == -1) 
+                    noImageLabel.classList.add("hidden");
+            }
+        }
+    }
+
 
     CreateBody()
     {
@@ -94,6 +136,9 @@ class ImageDialog extends EventTarget
             this.body.addEventListener("click", this.OnImageClicked.bind(this));
             this.container.appendChild(this.body);
         }
+
+        this.ShowHideNoImageLabel(this.arrBlobWithIds == 0);
+        
         
         const arrImage = this.GetAllImages();
         
@@ -390,10 +435,8 @@ class ImageDialog extends EventTarget
 
         const arrImageContainer = this.GetAllImageContainer();
         arrImageContainer[imageIndex].remove();
-
+        this.ShowHideNoImageLabel(this.arrBlobWithIds.length == 0);
         this.UpdateImageIds();
-
-
     }
 
     UpdateImageIds()

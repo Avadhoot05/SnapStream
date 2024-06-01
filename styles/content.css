@@ -96,6 +96,12 @@ i {
     overflow-y: scroll;
     box-sizing: border-box;
 }
+.center-children {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+}
 
 .snap-image-dialog-img-container{
     box-sizing: border-box;
@@ -184,6 +190,11 @@ i {
 .snap-count-bubble-udemy {
     top: -10px !important;
     right: -10px !important;
+}
+
+.snap-label {
+    color: white;
+    font-size: 16px;
 }
 
 
