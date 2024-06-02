@@ -211,6 +211,7 @@ class YTPageView extends EventTarget
         }
 
         this.btnScreenShot.addEventListener('click', () => {
+            Analytics.SendEvent(AnalyticsEventId.BTN_CLICKED, AnalyticsBtnId.YT_CAPTURE);
             this.CaptureScreenshotThrottled();
         });
     }
@@ -401,7 +402,7 @@ class UdemyPageView extends EventTarget
         }
 
         this.btnScreenShot.addEventListener('click', () => {
-
+            Analytics.SendEvent(AnalyticsEventId.BTN_CLICKED, AnalyticsBtnId.UDEMY_CAPTURE);
             this.CaptureScreenshotThrottled();
         });
     }

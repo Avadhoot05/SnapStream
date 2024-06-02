@@ -592,6 +592,7 @@ class ImageDialog extends EventTarget
     Cleanup() 
     {
         this.EnableDisableBodyScroll(true);
+        this.draggingItem = null;
         
         document.removeEventListener('mousemove', this.OnDrag);
         document.removeEventListener('touchmove', this.OnDrag);

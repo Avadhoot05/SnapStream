@@ -7,17 +7,20 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         const message = request["message"];
         if(message["type"] === "exportBtnClicked") 
         {
+            Analytics.SendEvent(AnalyticsEventId.BTN_CLICKED, AnalyticsBtnId.EXPORT);
             view.Export();
             return;
         }
         if(message["type"] === "showPagesBtnClicked") 
         {
+            Analytics.SendEvent(AnalyticsEventId.BTN_CLICKED, AnalyticsBtnId.SHOW_CAPTURES);
             view.ShowPages();
             return;
         }
 
         if(message["type"] === "deleteAllClicked")
         {
+            Analytics.SendEvent(AnalyticsEventId.BTN_CLICKED, AnalyticsBtnId.DELETE_ALL);
             view.DeleteAll();
             return;
         }
@@ -31,6 +34,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
 });
 
+
 function SendMessagetoPopup(message, cb)
 {
     if(!cb)
@@ -38,8 +42,6 @@ function SendMessagetoPopup(message, cb)
 
     chrome.runtime.sendMessage({message}, cb);
 }
-
-
 
 
 const view = new View(PageViewFactory.GetPageView(location.href));
@@ -65,6 +67,8 @@ function DisposeAll()
             ele.remove();
         }
     }
+
+
 }
 
 

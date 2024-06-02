@@ -4,7 +4,7 @@
     "version": "1.0",
     "description": "Capture video frames and transform them into convenient PDF notes, perfect for students and professionals.",
     "background": {"service_worker": "background/background.js"},
-    "permissions": ["activeTab", "scripting"],
+    "permissions": ["activeTab", "scripting", "storage"],
     "host_permissions": ["<all_urls>"],
     "action": {
       "default_popup": "popup.html",
@@ -17,7 +17,7 @@
     "content_scripts": [
       {
         "matches": ["https://www.youtube.com/watch?*", "https://www.udemy.com/course/*"],
-        "js": ["lib/jspdf.umd.min.js", "js/Utils.js", "js/Constants.js", "js/ImageDialog.js", "js/View.js", "js/Factory.js", "js/content.js"],
+        "js": ["lib/jspdf.umd.min.js", "js/Utils.js", "js/Constants.js", "js/Analytics.js", "js/ImageDialog.js", "js/View.js", "js/Factory.js", "js/content.js"],
         "css": ["styles/font.css", "styles/content.css"]
       }
     ],
