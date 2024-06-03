@@ -68,11 +68,15 @@ class View extends EventTarget
             "unit" : "pt"
         });
 
+
+        doc.setFontSize(10);
+
         const oImageRect = this.pageView.GetImageRect();
         let image = new Image();
         image.src =  URL.createObjectURL(this.arrBlob[0]);
         doc.addImage(image, "png", oImageRect["x"], oImageRect["y"], oImageRect["width"], oImageRect["height"], null, "SLOW");
 
+        this.AddWatermarkLink(doc);
         
         for(let i = 1; i < this.arrBlob.length; i++)
         {
@@ -80,8 +84,21 @@ class View extends EventTarget
             image.src =  URL.createObjectURL(this.arrBlob[i]);
             doc.addPage([oPageSize["width"], oPageSize["height"]], "l");
             doc.addImage(image, "png", oImageRect["x"], oImageRect["y"], oImageRect["width"], oImageRect["height"], null, "SLOW");
+            this.AddWatermarkLink(doc);
         }
         doc.save(`doc_${Date.now()}.pdf`);
+    }
+
+    AddWatermarkLink(doc)
+    {
+        const oLinkRect = this.pageView.GetWatermarkLinkRect();
+        const strText = "This PDF is generated with "; 
+        const strUrl = "https://chromewebstore.google.com/detail/screenshot-for-youtube/egdgicdoclnockpnafeeehnepfnhhbli";
+
+        doc.setTextColor(0, 0, 0);
+        doc.text(strText, oLinkRect["x"], oLinkRect["y"]);
+        doc.setTextColor(0, 23, 117);
+        doc.textWithLink("SnapStream", doc.getTextWidth(strText) + oLinkRect["x"], oLinkRect["y"], {url : strUrl}); 
     }
 
     ShowPages()
@@ -153,10 +170,20 @@ class YTPageView extends EventTarget
     GetImageRect()
     {
         return {
-            "x": this.uTopSpacing,
-            "y": this.uHorizontalSpacing,
+            "x": this.uHorizontalSpacing,
+            "y": this.uTopSpacing,
             "width" : this.uPageWidth - 2 * this.uHorizontalSpacing,
             "height" : Math.floor(this.uPageWidth * 9 /16) //since YT player mostly is 16:9 
+        }
+    }
+
+    GetWatermarkLinkRect()
+    {
+        return {
+            "x": this.uHorizontalSpacing, 
+            "y": this.uPageHeight - 10,
+            "width" : this.uPageWidth - 2 * this.uHorizontalSpacing,
+            "height": 10
         }
     }
 
@@ -280,7 +307,17 @@ class UdemyPageView extends EventTarget
             "x": this.uTopSpacing,
             "y": this.uHorizontalSpacing,
             "width" : this.uPageWidth - 2 * this.uHorizontalSpacing,
-            "height" : Math.floor(this.uPageWidth * 9 /16) //since YT player mostly is 16:9 
+            "height" : Math.floor(this.uPageWidth * 9 /16) //since Udemy player mostly is 16:9 
+        }
+    }
+
+    GetWatermarkLinkRect()
+    {
+        return {
+            "x": this.uHorizontalSpacing, 
+            "y": this.uPageHeight - 10,
+            "width" : this.uPageWidth - 2 * this.uHorizontalSpacing,
+            "height": 10
         }
     }
 
