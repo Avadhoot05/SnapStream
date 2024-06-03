@@ -81,7 +81,7 @@ class View extends EventTarget
             doc.addPage([oPageSize["width"], oPageSize["height"]], "l");
             doc.addImage(image, "png", oImageRect["x"], oImageRect["y"], oImageRect["width"], oImageRect["height"], null, "SLOW");
         }
-        doc.save("demo.pdf");
+        doc.save(`doc_${Date.now()}.pdf`);
     }
 
     ShowPages()
