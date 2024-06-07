@@ -1,7 +1,7 @@
 DisposeAll();
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    console.log('Message received in content script:', request.message);
+    console.log('Message received in content script:', request["message"]);
     if (request["message"]) 
     {
         const message = request["message"];

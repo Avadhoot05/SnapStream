@@ -10,6 +10,9 @@ class View extends EventTarget
         return "EVT_IMAGE_COUNT_UPDATED";
     }
 
+    /**
+     * @param {PageView} pageView 
+     */
     constructor(pageView)
     {
         super();
@@ -30,6 +33,9 @@ class View extends EventTarget
         window.addEventListener('beforeunload', this.OnTabClosed.bind(this), {capture: true});
     }
 
+    /**
+     * @param {Event} e 
+     */
     OnTabClosed(e)
     {
         if(this.arrBlob.length > 0)
@@ -45,6 +51,9 @@ class View extends EventTarget
         this.pageView.InsertCaptureBtn();
     }
 
+    /**
+     * @param {Event} e 
+     */
     OnImageCaptured(e)
     {
         console.log("Event recieved");
@@ -93,8 +102,7 @@ class View extends EventTarget
     {
         const oLinkRect = this.pageView.GetWatermarkLinkRect();
         const strText = "This PDF is generated with "; 
-        const strUrl = "https://chromewebstore.google.com/detail/screenshot-for-youtube/egdgicdoclnockpnafeeehnepfnhhbli";
-
+        const strUrl = "https://chromewebstore.google.com/detail/snapstream-snapshot-your/odcaecnjffmidpmeahpgjdfbncpnifee";
         doc.setTextColor(0, 0, 0);
         doc.text(strText, oLinkRect["x"], oLinkRect["y"]);
         doc.setTextColor(0, 23, 117);
@@ -116,6 +124,9 @@ class View extends EventTarget
         this.imageDialog.ShowHide(true);
     }
 
+    /**
+     * @param {Event} e 
+     */
     OnImageDialogSaveClicked(e)
     {
         this.arrBlob = e.detail;
@@ -127,8 +138,6 @@ class View extends EventTarget
     {
         this.arrBlob = [];
         this.pageView.UpdateCount(0);
-        // if(this.ImageDialog)
-        //     this.ImageDialog.DeleteAll();
         this.UpdatePopupState();
     }
 
@@ -138,8 +147,7 @@ class View extends EventTarget
     }
 }
 
-
-class YTPageView extends EventTarget
+class PageView extends EventTarget
 {
     constructor()
     {
@@ -147,7 +155,56 @@ class YTPageView extends EventTarget
         this.btnScreenShot;
         this.countBubble;
         this.container;
+    }
 
+    CreateScreenshotBtn()
+    {
+        this.container = document.createElement("div");
+        this.container.className = "snap-screenshot-btn-container"
+
+        this.btnScreenShot = document.createElement("img");
+        this.btnScreenShot.src = chrome.runtime.getURL("./icons/capture.png");
+        this.btnScreenShot.className = "snap-screenshot-btn ytp-button";
+        this.btnScreenShot.id = "snap-screenshot-btn";
+        this.btnScreenShot.title = "Capture with SnapStream";
+        this.container.appendChild(this.btnScreenShot);
+    }
+
+    CreateCountBubble()
+    {
+        this.countBubble = document.createElement("span");
+        this.countBubble.className = "snap-count-bubble";
+        this.container.appendChild(this.countBubble);
+    }
+
+    /**
+     * @param {number} uCount 
+     */
+    UpdateCount(uCount)
+    {
+        if(!this.countBubble)
+            this.CreateCountBubble();
+        if(uCount == 0)
+        {
+            this.countBubble.classList.remove("visible");
+            this.countBubble.classList.add("hidden");
+        }
+        else
+        {
+            this.countBubble.innerHTML = uCount;
+            this.countBubble.classList.add("visible");
+            this.countBubble.classList.remove("hidden");
+        }
+    }
+}
+
+
+class YTPageView extends PageView
+{
+    constructor()
+    {
+        super();
+        
         this.imageFormat = ".png";
         this.CaptureScreenshotThrottled = GetThrottleFunction(this.CaptureScreenshot.bind(this), 200); 
 
@@ -189,43 +246,13 @@ class YTPageView extends EventTarget
 
     CreateScreenshotBtn()
     {
-        this.container = document.createElement("div");
-        this.container.className = "snap-screenshot-btn-container"
-
-        this.btnScreenShot = document.createElement("img");
-        this.btnScreenShot.src = chrome.runtime.getURL("./icons/capture.png");
-        this.btnScreenShot.className = "snap-yt-screenshot-btn screenshotButton ytp-button";
-        this.container.appendChild(this.btnScreenShot);
-    }
-
-    CreateCountBubble()
-    {
-        this.countBubble = document.createElement("span");
-        this.countBubble.className = "snap-count-bubble";
-        this.container.appendChild(this.countBubble);
-    }
-
-    UpdateCount(uCount)
-    {
-        if(!this.countBubble)
-            this.CreateCountBubble();
-        if(uCount == 0)
-        {
-            this.countBubble.classList.remove("visible");
-            this.countBubble.classList.add("hidden");
-        }
-        else
-        {
-            this.countBubble.innerHTML = uCount;
-            this.countBubble.classList.add("visible");
-            this.countBubble.classList.remove("hidden");
-        }
+        super.CreateScreenshotBtn();
+        this.btnScreenShot.classList.add("ytp-button");
     }
 
     InsertCaptureBtn()
     {
         this.CreateScreenshotBtn();
-        
         
         const bottomControls = document.getElementsByClassName("ytp-right-controls")[0];
         if (bottomControls) 
@@ -257,31 +284,20 @@ class YTPageView extends EventTarget
         const downloadLink = document.createElement("a");
         downloadLink.download = title;
     
-        
-        function DownloadBlob(blob) {
-            downloadLink.href = URL.createObjectURL(blob);
-            downloadLink.click();
-        }
-        
         canvas.toBlob(async (blob) => {
             this.dispatchEvent(new CustomEvent(View.EVT_IMAGE_CAPTURED, {detail: blob})); 
             
-            //DownloadBlob(blob);
         }, 'image/' + this.imageFormat);
-        
     }
 }
 
 
-class UdemyPageView extends EventTarget 
+class UdemyPageView extends PageView 
 {
     constructor()
     {
         super();
-        this.btnScreenShot;
-        this.countBubble;
-        this.container;
-
+        
         this.imageFormat = ".png";
         this.CaptureScreenshotThrottled = GetThrottleFunction(this.CaptureScreenshot.bind(this), 200); 
 
@@ -323,33 +339,19 @@ class UdemyPageView extends EventTarget
 
     CreateScreenshotBtn()
     {
-        this.container = document.createElement("div");
-        this.container.className = "snap-screenshot-btn-container"
-
-        this.btnScreenShot = document.createElement("img");
-        this.btnScreenShot.src = chrome.runtime.getURL("./icons/capture.png");
-        this.btnScreenShot.className = "snap-yt-screenshot-btn screenshotButton udemy-button";
-        this.btnScreenShot.id = "snap-screenshot-btn";
-        this.container.appendChild(this.btnScreenShot);
+        super.CreateScreenshotBtn();
+        this.btnScreenShot.classList.add("udemy-button");
     }
 
     CreateCountBubble()
     {
-        this.countBubble = document.createElement("span");
-        this.countBubble.className = "snap-count-bubble snap-count-bubble-udemy";
-        this.container.appendChild(this.countBubble);
-    }
-
-    UpdateCount(uCount)
-    {
-        if(!this.countBubble)
-            this.CreateCountBubble();
-        this.countBubble.innerHTML = uCount;
+        super.CreateCountBubble();
+        this.countBubble.classList.add("snap-count-bubble-udemy");
     }
 
     ObserveMutation()
     {
-        let observer = new MutationObserver(mutations =>  
+        let observer = new MutationObserver((mutations, observerObj) =>  
         {
             mutations.forEach(mutation => {
                 if (!mutation.addedNodes) 
@@ -369,11 +371,9 @@ class UdemyPageView extends EventTarget
                     {
                         if(cls.indexOf(elementClass.UDEMY_VIDEO_PLAYER_PREFIX) != -1)
                         {
-                            observer.disconnect();
+                            observerObj.disconnect();
                             this.InsertCaptureBtn();
                         }
-                            
-
                     }
                 }
             });
@@ -412,7 +412,6 @@ class UdemyPageView extends EventTarget
         if(btn)
             return;
 
-
         this.CreateScreenshotBtn();
 
         /**@type {HTMLElement}*/
@@ -430,7 +429,6 @@ class UdemyPageView extends EventTarget
         
         if(targetEle && targetEle.parentElement)
         {
-            // targetEle = targetEle[0];
             targetEle.parentElement.parentElement.insertBefore(this.container, targetEle.parentElement);
         }
         else
@@ -468,15 +466,11 @@ class UdemyPageView extends EventTarget
         downloadLink.download = title;
     
         
-        function DownloadBlob(blob) {
-            downloadLink.href = URL.createObjectURL(blob);
-            downloadLink.click();
-        }
+        
         
         canvas.toBlob(async (blob) => {
             this.dispatchEvent(new CustomEvent(View.EVT_IMAGE_CAPTURED, {detail: blob})); 
             
-            //DownloadBlob(blob);
         }, 'image/' + this.imageFormat);
         
     }

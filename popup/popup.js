@@ -7,7 +7,7 @@ function SendMessageToActiveTabContent(msg)
 
 function OnMessageRecievedFromContent(request, sender, sendResponse)
 {
-    console.log('Message received from content script:', request.message);
+    console.log('Message received from content script:', request["message"]);
     if (request["message"]) 
     {
         const message = request["message"];
@@ -32,16 +32,14 @@ btnShowPages.addEventListener("click", () => {
     SendMessageToActiveTabContent({"type" : "showPagesBtnClicked"});
 });
 
-
 btnExport.addEventListener("click", () => {
     SendMessageToActiveTabContent({"type" : "exportBtnClicked"});
 });
 
-
-
 btnDelete.addEventListener("click", () => {
     SendMessageToActiveTabContent({"type" : "deleteAllClicked"});
 });
+
 
 function CaptureCountUpdated(uCount)
 {

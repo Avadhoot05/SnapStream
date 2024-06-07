@@ -24,12 +24,16 @@ class ImageDialog extends EventTarget
         this.uPointerStartY;
 
         this.OnDrag = this.OnDrag.bind(this);
+        this.OnDragEnd = this.OnDragEnd.bind(this);
 
         this.CreateFooter();
         this.ShowHide(false);
         this.InitDragging();
     }
 
+    /**
+     * @param {Array} arrBlob 
+     */
     SetBlobs(arrBlob)
     {
         this.arrBlobWithIds = this.CreateImageData(arrBlob);
@@ -37,6 +41,10 @@ class ImageDialog extends EventTarget
         this.CreateBody();
     }
 
+    /** 
+     * @param {Arrat} arrBlobWithIds 
+     * @returns {Map}
+     */
     CreateImageDataMap(arrBlobWithIds)
     {
         const mapBlob = arrBlobWithIds.reduce((acc, curr) => {
@@ -47,6 +55,10 @@ class ImageDialog extends EventTarget
         return mapBlob;
     }
 
+    /**
+     * @param {Array} arrBlob 
+     * @returns {Array}
+     */
     CreateImageData(arrBlob)
     {
         const arrBlobWithIds = arrBlob.map((blob, index) => {
@@ -59,6 +71,9 @@ class ImageDialog extends EventTarget
         return arrBlobWithIds;
     }
 
+    /**
+     * @param {boolean} bShow 
+     */
     ShowHide(bShow)
     {
         this.container.style.display = bShow ? "block" : "none";
@@ -85,6 +100,10 @@ class ImageDialog extends EventTarget
         this.container.appendChild(header);
     }
 
+    /**
+     * @param {string} strText 
+     * @returns {HTMLElement}
+     */
     GetLabel(strText)
     {
         const el = document.createElement("div");
@@ -93,6 +112,9 @@ class ImageDialog extends EventTarget
         return el;
     }
 
+    /**
+     * @param {boolean} bShow 
+     */
     ShowHideNoImageLabel(bShow)
     {
         if(bShow)
@@ -125,7 +147,6 @@ class ImageDialog extends EventTarget
             }
         }
     }
-
 
     CreateBody()
     {
@@ -161,6 +182,10 @@ class ImageDialog extends EventTarget
         this.body.appendChild(fragment);
     }
 
+    /**
+     * @param {Event} e 
+     * @returns 
+     */
     OnImageClicked(e)
     {
         e.stopPropagation();
@@ -170,9 +195,13 @@ class ImageDialog extends EventTarget
             this.OnImageDelete(id);
             return;
         }
+
+        if(this.IsDownLoadIconClicked(e))
+        {
+            this.OnImageDownload(id);
+            return;
+        }
             
-
-
         const needle = "snap-image-dialog-img-"; 
         if(id.indexOf(needle) == -1) 
             return;
@@ -183,6 +212,10 @@ class ImageDialog extends EventTarget
 
     }
 
+    /**
+     * @param {object} blobData 
+     * @returns {HTMLElement}
+     */
     CreateImage(blobData)
     {
         const {blob, id} = blobData;
@@ -197,13 +230,24 @@ class ImageDialog extends EventTarget
         imgContainer.appendChild(img);
 
         const deleteIcon = this.CreateButton("delete.png"); 
-        deleteIcon.className = "snap-image-dialog-img-delete";
+        deleteIcon.className = "snap-image-dialog-img-icon snap-image-dialog-img-delete";
         deleteIcon.id = `snap-image-dialog-img-delete-${id}`;
+        deleteIcon.title = "Delete image";
         imgContainer.appendChild(deleteIcon);
+
+        const downloadIcon = this.CreateButton("download.png"); 
+        downloadIcon.className = "snap-image-dialog-img-icon snap-image-dialog-img-download";
+        downloadIcon.id = `snap-image-dialog-img-download-${id}`;
+        downloadIcon.title = "Download image";
+        imgContainer.appendChild(downloadIcon);
 
         return imgContainer;
     }
 
+    /**
+     * @param {string} strImageName 
+     * @returns {HTMLElement}
+     */
     CreateButton(strImageName)
     {
         const btn = document.createElement("button");
@@ -234,7 +278,9 @@ class ImageDialog extends EventTarget
         footer.appendChild(btnSave);   
     }
 
-
+    /**
+     * @param {Event} e 
+     */
     OnSaveClicked(e)
     {
         const arrBlob = this.arrBlobWithIds.map(blob => blob.blob);
@@ -242,6 +288,9 @@ class ImageDialog extends EventTarget
         this.ShowHide(false);
     }
 
+    /**
+     * @param {Event} e 
+     */
     OnCancelClicked(e)
     {
         this.ShowHide(false);
@@ -249,12 +298,18 @@ class ImageDialog extends EventTarget
 
     //#region  drag and reorder
 
-
+    /**
+     * @param {boolean} bEnable 
+     */
     EnableDisableBodyScroll(bEnable)
     {
         this.body.style.overflowY = bEnable ? "scroll" : "hidden";
     }
 
+
+    /**
+     * @param {boolean} bShow 
+     */
     ShowHideImageButton(bShow)
     {
         const arrDeleteBtn =  this.GetAllDeleteBtn();
@@ -263,6 +318,16 @@ class ImageDialog extends EventTarget
         })
     }
 
+    /**
+     * @param {boolean} bShow 
+     */
+    ShowHideDownloadButton(bShow)
+    {
+        const arrDownloadBtn =  this.GetAllDownloadBtn();
+        arrDownloadBtn.forEach(btn => {
+            btn.style.display = bShow ? "block" : "none";
+        })
+    }
 
     InitDragging()
     {
@@ -270,6 +335,9 @@ class ImageDialog extends EventTarget
         this.body.addEventListener('touchstart', this.OnDragStart.bind(this));
     }
 
+    /**
+     * @param {Event} e 
+     */
     OnDragStart(e) 
     {
         if (e.target.classList.contains('snap-image-dialog-img')) {
@@ -278,30 +346,37 @@ class ImageDialog extends EventTarget
       
         if (!this.draggingItem) 
             return;
+
+        console.log("[drag] started");
       
         this.uPointerStartX = e.clientX || e.touches?.[0]?.clientX;
         this.uPointerStartY = e.clientY || e.touches?.[0]?.clientY;
       
         this.EnableDisableBodyScroll(false);
         this.ShowHideImageButton(false);
+        this.ShowHideDownloadButton(false);
         this.InitDraggableItem();
         //prevRect = this.draggingItem.getBoundingClientRect();
       
         document.addEventListener('mousemove', this.OnDrag);
         document.addEventListener('touchmove', this.OnDrag, { passive: false });
 
-        document.addEventListener('mouseup', this.OnDragEnd.bind(this));
-        document.addEventListener('touchend', this.OnDragEnd.bind(this));
+        document.addEventListener('mouseup', this.OnDragEnd);
+        document.addEventListener('touchend', this.OnDragEnd);
     }
 
-
+    /**
+     * @param {Event} e 
+     */
     OnDrag(e) 
     {
+        console.log("[drag] dragging");
         if (!this.draggingItem) 
             return;
       
         e.preventDefault();
-      
+        e.stopPropagation();
+
         const clientX = e.clientX || e.touches[0].clientX;
         const clientY = e.clientY || e.touches[0].clientY;
       
@@ -318,10 +393,7 @@ class ImageDialog extends EventTarget
             const arrImageContainer = this.GetAllImageContainer();
             this.PositionInsertPlaceHolderAfter(arrImageContainer[idx == -1 ? 0 : idx], idx != -1);
         }
-        
-        this.UpdateIdleItemsStateAndPosition()
     }
-
 
     GetIndexToShowPlaceholderAfter()
     {
@@ -335,6 +407,11 @@ class ImageDialog extends EventTarget
         return arr.length == 0 ? -2 : arr[0];  
     }
 
+    /**
+     * @param {string} prefix 
+     * @param {string} id 
+     * @returns {number}
+     */
     GetImageIndexFromEleId(prefix, id)
     {
         const prefixIndex = id.indexOf(prefix); 
@@ -343,22 +420,33 @@ class ImageDialog extends EventTarget
 
         return parseInt(id.substring(prefixIndex + prefix.length));
     }
+
     Reset()
     {
         this.draggingItem.style.transform = "none";
         this.ShowHideInsertPlaceholder(false);
         this.EnableDisableBodyScroll(true);
         this.ShowHideImageButton(true);
+        this.ShowHideDownloadButton(true);
         this.Cleanup();  
     }
 
+    /**
+     * @param {Event} e 
+     */
     OnDragEnd(e)
     {
-        document.addEventListener('mouseup', this.OnDragEnd.bind(this));
-        document.addEventListener('touchend', this.OnDragEnd.bind(this));
+        document.removeEventListener('mousemove', this.OnDrag);
+        document.removeEventListener('touchmove', this.OnDrag);
+
+        document.removeEventListener('mouseup', this.OnDragEnd);
+        document.removeEventListener('touchend', this.OnDragEnd);
 
         if(!this.draggingItem)
             return;
+
+        console.log("[drag] end");
+        
 
         const id =  this.draggingItem.id;
         const imageIndex = this.GetImageIndexFromEleId("snap-image-dialog-img-", id);
@@ -411,15 +499,28 @@ class ImageDialog extends EventTarget
         this.Reset();  
     }
 
-
+    /**
+     * @param {Event} e 
+     */
     IsDeleteIconClicked(e)
     {
-        return e.target.classList.contains('snap-image-dialog-img-delete')
+        return e.target.classList.contains('snap-image-dialog-img-delete');
     }
 
+    /**
+     * @param {Event} e 
+     */
+    IsDownLoadIconClicked(e)
+    {
+        return e.target.classList.contains('snap-image-dialog-img-download');
+    }
+
+    /**
+     * @param {string} id 
+     */
     OnImageDelete(id)
     {
-        const imageIndex = this.GetImageIndexFromEleId("snap-image-dialog-img-delete-", id)
+        const imageIndex = this.GetImageIndexFromEleId("snap-image-dialog-img-delete-", id);
         if(imageIndex == -1)
             return;
 
@@ -439,6 +540,23 @@ class ImageDialog extends EventTarget
         this.UpdateImageIds();
     }
 
+    /**
+     * @param {string} id 
+     */
+    OnImageDownload(id)
+    {
+        const imageIndex = this.GetImageIndexFromEleId("snap-image-dialog-img-download-", id);
+        if(imageIndex == -1)
+            return;
+        
+        const blob = this.arrBlobWithIds[imageIndex].blob;
+        
+        const downloadLink = document.createElement("a");
+	    downloadLink.download = `SnapStream_${Date.now()}`;
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.click();
+    }
+
     UpdateImageIds()
     {
         const arrImage = this.GetAllImages();
@@ -451,9 +569,12 @@ class ImageDialog extends EventTarget
             const deleteIcon = imgContainer.getElementsByClassName("snap-image-dialog-img-delete");
             if(deleteIcon.length > 0)            
                 deleteIcon[0].id = `snap-image-dialog-img-delete-${idx}`;
+            
+            const downloadIcon = imgContainer.getElementsByClassName("snap-image-dialog-img-download");
+            if(downloadIcon.length > 0)            
+                downloadIcon[0].id = `snap-image-dialog-img-download-${idx}`;
         });
     }
-
 
     CreateInsertPlaceHolder()
     {
@@ -473,7 +594,6 @@ class ImageDialog extends EventTarget
         const oRect = node.getBoundingClientRect();
         const oBodyRect = this.body.getBoundingClientRect();
 
-
         this.insertPlaceholder.style.top = `${oRect.top - oBodyRect.top + 48}px`;
 
         if(bAfter)
@@ -483,6 +603,9 @@ class ImageDialog extends EventTarget
         this.ShowHideInsertPlaceholder(true);
     }
 
+    /**
+     * @param {boolean} bShow 
+     */
     ShowHideInsertPlaceholder(bShow)
     {
         if(!this.insertPlaceholder)
@@ -498,22 +621,38 @@ class ImageDialog extends EventTarget
             this.insertPlaceholder.classList.remove("visible");
             this.insertPlaceholder.classList.add("hidden");
         }
-        
     }
 
+    /**
+     * @returns {Array}
+     */
     GetAllImageContainer()
     {
         return Array.from(document.getElementsByClassName("snap-image-dialog-img-container"));
     }
 
+    /**
+     * @returns {Array}
+     */
     GetAllImages()
     {
         return Array.from(document.getElementsByClassName("snap-image-dialog-img"));
     }
 
+    /**
+     * @returns {Array}
+     */
     GetAllDeleteBtn()
     {
         return Array.from(document.getElementsByClassName("snap-image-dialog-img-delete"));
+    }
+
+    /**
+     * @returns {Array}
+     */
+    GetAllDownloadBtn()
+    {
+        return Array.from(document.getElementsByClassName("snap-image-dialog-img-download"));
     }
 
     /**
@@ -570,6 +709,10 @@ class ImageDialog extends EventTarget
         return false;
     }
 
+    /**
+     * @param {object} oDraggingItemRect 
+     * @returns {Array}
+     */
     GetIntersectingImageContainer(oDraggingItemRect)
     {
         const arrImageContainer = this.GetAllImageContainer();
@@ -592,6 +735,7 @@ class ImageDialog extends EventTarget
     Cleanup() 
     {
         this.EnableDisableBodyScroll(true);
+        console.log("[drag] clean");
         this.draggingItem = null;
         
         document.removeEventListener('mousemove', this.OnDrag);
@@ -602,11 +746,6 @@ class ImageDialog extends EventTarget
     {
         this.draggingItem.classList.remove('is-idle');
         this.draggingItem.classList.add('is-draggable');
-    }
-
-    UpdateIdleItemsStateAndPosition()
-    {
-
     }
     //#endregion
 
