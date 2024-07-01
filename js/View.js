@@ -46,9 +46,9 @@ class View extends EventTarget
             
     }
 
-    InsertCaptureBtn()
+    InsertScreenshotBtn()
     {
-        this.pageView.InsertCaptureBtn();
+        this.pageView.InsertScreenshotBtn();
     }
 
     /**
@@ -95,7 +95,7 @@ class View extends EventTarget
             doc.addImage(image, "png", oImageRect["x"], oImageRect["y"], oImageRect["width"], oImageRect["height"], null, "SLOW");
             this.AddWatermarkLink(doc);
         }
-        doc.save(`doc_${Date.now()}.pdf`);
+        doc.save(`SnapStream_${Date.now()}.pdf`);
     }
 
     AddWatermarkLink(doc)
@@ -250,7 +250,7 @@ class YTPageView extends PageView
         this.btnScreenShot.classList.add("ytp-button");
     }
 
-    InsertCaptureBtn()
+    InsertScreenshotBtn()
     {
         this.CreateScreenshotBtn();
         
@@ -359,7 +359,6 @@ class UdemyPageView extends PageView
                 
                 for (let node of mutation.target.childNodes) 
                 {
-                    console.log("xxxx", node.tagName);
                     if(node.tagName && node.tagName.toLowerCase() != "video")
                         continue;
 
@@ -372,7 +371,7 @@ class UdemyPageView extends PageView
                         if(cls.indexOf(elementClass.UDEMY_VIDEO_PLAYER_PREFIX) != -1)
                         {
                             observerObj.disconnect();
-                            this.InsertCaptureBtn();
+                            this.InsertScreenshotBtn();
                         }
                     }
                 }
@@ -385,28 +384,7 @@ class UdemyPageView extends PageView
         });
     }
 
-    FindRecursive(node, classname)
-    {
-        if(node.className && node.className.indexOf && node.className.indexOf(classname) != -1)
-            return node;
-        
-        let target = null;
-        let children = node.children;
-        if(!children)
-            return target;
-        children = Array.from(children);
-        
-        for(let child of children)
-        {
-            target = this.FindRecursive(child, classname);
-            if(target)
-                break;
-        } 
-
-        return target;
-    }
-
-    InsertCaptureBtn()
+    InsertScreenshotBtn()
     {
         const btn = document.getElementById("snap-screenshot-btn");
         if(btn)
@@ -425,7 +403,7 @@ class UdemyPageView extends PageView
 
         const section = document.getElementsByTagName("section");
         const targetClass = "volume-control--slider-"; //sound btn         
-        const targetEle = this.FindRecursive(document.body, targetClass);
+        const targetEle = FindRecursive(document.body, targetClass);
         
         if(targetEle && targetEle.parentElement)
         {

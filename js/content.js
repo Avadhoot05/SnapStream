@@ -46,7 +46,7 @@ function SendMessagetoPopup(message, cb)
 
 const view = new View(PageViewFactory.GetPageView(location.href));
 view.addEventListener(View.EVT_IMAGE_COUNT_UPDATED, CountUpdated);
-view.InsertCaptureBtn();
+view.InsertScreenshotBtn();
 
 
 function CountUpdated(e)

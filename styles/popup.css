@@ -1,3 +1,7 @@
+input {
+    margin: 0 5px;
+}
+
 .snap-container {
     width: 300px;
     padding: 10px 10px;
@@ -45,4 +49,25 @@
 .disable {
     pointer-events: none;
     cursor: default;
+}
+
+.snap-choice-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+
+.snap-choice-input-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.snap-choice-input {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

@@ -148,6 +148,12 @@ class ImageDialog extends EventTarget
         }
     }
 
+    RemoveAllImages()
+    {
+        const arrImage = this.GetAllImageContainer();
+        arrImage.forEach(img => img.remove());
+    }
+
     CreateBody()
     {
         if(!this.body)
@@ -158,14 +164,21 @@ class ImageDialog extends EventTarget
             this.container.appendChild(this.body);
         }
 
-        this.ShowHideNoImageLabel(this.arrBlobWithIds == 0);
+        if(this.arrBlobWithIds == 0)
+        {
+            this.RemoveAllImages();
+            this.ShowHideNoImageLabel(true);
+            return;
+        }
+
+        this.ShowHideNoImageLabel(false);
         
         
         const arrImage = this.GetAllImages();
         
         let i = 0;
 
-        while(i < arrImage.length)
+        while(i < arrImage.length && i < this.arrBlobWithIds.length)
         {
             const img = arrImage[i];
             img.src = URL.createObjectURL(this.arrBlobWithIds[i].blob);
@@ -176,6 +189,14 @@ class ImageDialog extends EventTarget
         while(i < this.arrBlobWithIds.length)
         {
             fragment.appendChild(this.CreateImage(this.arrBlobWithIds[i]));
+            i++;
+        }
+
+        const arrImageContainer = this.GetAllImageContainer();
+
+        while(i < arrImageContainer.length)
+        {
+            arrImageContainer[i].remove();
             i++;
         }
 
