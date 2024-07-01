@@ -1,3 +1,8 @@
+const CaptureBtnFunction = Object.freeze({
+    SCREENSHOT: 1, 
+    EXPORT: 2
+});
+
 function SendMessageToActiveTabContent(msg)
 {
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -27,6 +32,11 @@ chrome.runtime.onMessage.addListener(OnMessageRecievedFromContent);
 const btnShowPages = document.getElementById("snap-btn-show-page");
 const btnExport = document.getElementById("snap-btn-export");
 const btnDelete = document.getElementById("snap-btn-delete");
+const btnRadioScreenshot = document.getElementById("snap-screenshot");
+const btnRadioExport = document.getElementById("snap-export");
+
+
+
 
 btnShowPages.addEventListener("click", () => {
     SendMessageToActiveTabContent({"type" : "showPagesBtnClicked"});
@@ -38,6 +48,20 @@ btnExport.addEventListener("click", () => {
 
 btnDelete.addEventListener("click", () => {
     SendMessageToActiveTabContent({"type" : "deleteAllClicked"});
+});
+
+btnRadioExport.addEventListener("onchange", () => {
+    
+    let uFunction = CaptureBtnFunction.EXPORT;
+    if(btnRadioScreenshot.checked)
+        uFunction = CaptureBtnFunction.SCREENSHOT;
+
+    SendMessageToActiveTabContent({"type" : "btnFunctionChanged", "uFunction": uFunction});
+});
+
+btnRadioScreenshot.addEventListener("onchange", () => {
+    let bExport = btnRadioExport.checked;
+    SendMessageToActiveTabContent({"type" : "btnFunctionChanged", "uFunction": uFunction});
 });
 
 

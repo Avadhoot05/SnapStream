@@ -31,6 +31,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             return;
         }
         
+        if(message["type"] === "btnFunctionChanged")
+        {
+            view.SetCaptureButtonFunction(message["uFunction"]);
+            return;
+        }
     }
 });
 

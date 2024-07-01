@@ -29,3 +29,9 @@ const AnalyticsBtnId = Object.freeze({
 const GA_ENDPOINT = "https://www.google-analytics.com/mp/collect";
 const MEASUREMENT_ID = "G-3HGD0WGK2F";
 const API_SECRET = "TT550J5MSC-paLmRhKeK_A";
+
+
+const CaptureBtnFunction = Object.freeze({
+    SCREENSHOT: 1, 
+    EXPORT: 2
+});

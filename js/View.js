@@ -29,8 +29,13 @@ class View extends EventTarget
         this.arrImageEle = [];
 
         this.imageDialog;
-
+        this.uCaptureBtnFunction = CaptureBtnFunction.EXPORT;
         window.addEventListener('beforeunload', this.OnTabClosed.bind(this), {capture: true});
+    }
+
+    SetCaptureButtonFunction(uFunction)
+    {
+        this.uCaptureBtnFunction = uFunction;
     }
 
     /**
