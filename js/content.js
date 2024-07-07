@@ -1,4 +1,5 @@
 DisposeAll();
+GetUserPreferenceFromLocalStorage();
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     console.log('Message received in content script:', request["message"]);
@@ -30,10 +31,22 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             view.UpdatePopupState();
             return;
         }
-        
-        if(message["type"] === "btnFunctionChanged")
+
+        if(message["type"] === "getUserPreference")
         {
-            view.SetCaptureButtonFunction(message["uFunction"]);
+            let data = {
+                "captureBtnFunction": view.GetCaptureButtonFunction()
+            };
+            SendMessagetoPopup({"type": "SetUserPreference", "data" : data}, null);
+            return;
+        }
+        
+        if(message["type"] === "userPreferenceChanged")
+        {
+            console.log("function changed");
+            let data = message["data"];
+            view.SetCaptureButtonFunction(message["captureBtnFunction"]);
+            SetUserPreferenceInLocalStorage(data);
             return;
         }
     }
@@ -60,6 +73,27 @@ function CountUpdated(e)
     SendMessagetoPopup({"type": "CountUpdated", "uCount" : uCount}, null);
 }
 
+function GetUserPreferenceFromLocalStorage()
+{
+    chrome.storage.local.get(["captureBtnFunction"]).then((result) => {
+        console.log("Value is " + result);
+        if(Object.keys(result).length != 0)
+            view.SetCaptureButtonFunction(result["captureBtnFunction"]);
+      });
+}
+
+/**
+ * @param {object} data 
+ */
+function SetUserPreferenceInLocalStorage(data)
+{
+    chrome.storage.local.set(data).then(() => {
+        console.log("Value is set", data);
+      });
+}
+
+
+
 function DisposeAll()
 {
     const arrCls = ["snap-screenshot-btn-container", "snap-image-dialog-container"];
@@ -72,8 +106,6 @@ function DisposeAll()
             ele.remove();
         }
     }
-
-
 }
 
 

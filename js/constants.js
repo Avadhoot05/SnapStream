@@ -33,5 +33,6 @@ const API_SECRET = "TT550J5MSC-paLmRhKeK_A";
 
 const CaptureBtnFunction = Object.freeze({
     SCREENSHOT: 1, 
-    EXPORT: 2
+    EXPORT: 2, 
+    COPY_CLIPBOARD: 3
 });

@@ -33,9 +33,20 @@ class View extends EventTarget
         window.addEventListener('beforeunload', this.OnTabClosed.bind(this), {capture: true});
     }
 
+    /**
+     * @param {number} uFunction 
+     */
     SetCaptureButtonFunction(uFunction)
     {
         this.uCaptureBtnFunction = uFunction;
+    }
+
+    /**
+     * @returns {number}  
+     */
+    GetCaptureButtonFunction()
+    {
+        return this.uCaptureBtnFunction;
     }
 
     /**
@@ -47,8 +58,7 @@ class View extends EventTarget
         {
             e.preventDefault();
             e.returnValue = 'Captured images will be lost.';
-        }
-            
+        }       
     }
 
     InsertScreenshotBtn()
@@ -61,11 +71,32 @@ class View extends EventTarget
      */
     OnImageCaptured(e)
     {
+        let downloadLink = document.createElement("a");
+	    downloadLink.download = `SnapStream_${Date.now()}.png`;
+        
+        function DownloadBlob(blob) {
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.click();
+        }
+    
+        async function ClipboardBlob(blob) {
+            const clipboardItemInput = new ClipboardItem({ "image/png": blob });
+            await navigator.clipboard.write([clipboardItemInput]);
+        }
+
         console.log("Event recieved");
         console.log(e);
-        this.arrBlob.push(e.detail);
-        this.pageView.UpdateCount(this.arrBlob.length);
-        this.UpdatePopupState();
+
+        if(this.uCaptureBtnFunction == CaptureBtnFunction.SCREENSHOT)
+        {
+            DownloadBlob(e.detail);
+        }
+        else
+        {
+            this.arrBlob.push(e.detail);
+            this.pageView.UpdateCount(this.arrBlob.length);
+            this.UpdatePopupState();
+        }
     }
 
     Export()

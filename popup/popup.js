@@ -21,6 +21,10 @@ function OnMessageRecievedFromContent(request, sender, sendResponse)
             CaptureCountUpdated(message["uCount"]);
             return;
         }
+        if(message["type"] === "SetUserPreference")
+        {
+            SetUIByUserPreference(message["data"]);
+        }
     }
 }
 
@@ -32,8 +36,8 @@ chrome.runtime.onMessage.addListener(OnMessageRecievedFromContent);
 const btnShowPages = document.getElementById("snap-btn-show-page");
 const btnExport = document.getElementById("snap-btn-export");
 const btnDelete = document.getElementById("snap-btn-delete");
-const btnRadioScreenshot = document.getElementById("snap-screenshot");
-const btnRadioExport = document.getElementById("snap-export");
+const btnRadioScreenshot = document.getElementById("snap-screenshot-radio");
+const btnRadioExport = document.getElementById("snap-export-radio");
 
 
 
@@ -50,21 +54,43 @@ btnDelete.addEventListener("click", () => {
     SendMessageToActiveTabContent({"type" : "deleteAllClicked"});
 });
 
-btnRadioExport.addEventListener("onchange", () => {
-    
+btnRadioExport.addEventListener("change", OnUserPreferenceChanged);
+btnRadioScreenshot.addEventListener("change", OnUserPreferenceChanged);
+
+function OnUserPreferenceChanged()
+{
     let uFunction = CaptureBtnFunction.EXPORT;
     if(btnRadioScreenshot.checked)
         uFunction = CaptureBtnFunction.SCREENSHOT;
+    
+    let data = {
+        "captureBtnFunction": uFunction
+    }
+    SendMessageToActiveTabContent({"type" : "userPreferenceChanged", data});
+}
 
-    SendMessageToActiveTabContent({"type" : "btnFunctionChanged", "uFunction": uFunction});
-});
+/**
+ * @param {object} data 
+ */
+function SetUIByUserPreference(data)
+{
+    let uCaptureBtnFunction = data["captureBtnFunction"];
+    if(uCaptureBtnFunction == CaptureBtnFunction.EXPORT)
+    {
+        btnRadioScreenshot.checked = false;
+        btnRadioExport.checked = true;
+    }
+    else
+    {
+        btnRadioScreenshot.checked = true;
+        btnRadioExport.checked = false;
+    }
+    OnUserPreferenceChanged();
+}
 
-btnRadioScreenshot.addEventListener("onchange", () => {
-    let bExport = btnRadioExport.checked;
-    SendMessageToActiveTabContent({"type" : "btnFunctionChanged", "uFunction": uFunction});
-});
-
-
+/**
+ * @param {number} uCount 
+ */
 function CaptureCountUpdated(uCount)
 {
     if(uCount == 0)
@@ -79,6 +105,7 @@ function CaptureCountUpdated(uCount)
     }
 }
 
-
 SendMessageToActiveTabContent({"type" : "getImageCount"});
+SendMessageToActiveTabContent({"type" : "getUserPreference"});
+
 
